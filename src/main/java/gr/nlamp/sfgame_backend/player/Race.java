@@ -1,4 +1,4 @@
-package gr.nlamp.sfgame_backend.enums;
+package gr.nlamp.sfgame_backend.player;
 
 public enum Race {
     HUMAN,

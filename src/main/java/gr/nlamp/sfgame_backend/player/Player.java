@@ -1,9 +1,6 @@
 package gr.nlamp.sfgame_backend.player;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import gr.nlamp.sfgame_backend.enums.Class;
-import gr.nlamp.sfgame_backend.enums.Gender;
-import gr.nlamp.sfgame_backend.enums.Race;
 import gr.nlamp.sfgame_backend.guild.GuildInvitation;
 import gr.nlamp.sfgame_backend.guild.GuildMember;
 import jakarta.persistence.*;
