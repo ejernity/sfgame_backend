@@ -1,13 +1,18 @@
 package gr.nlamp.sfgame_backend.player;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import gr.nlamp.sfgame_backend.enums.Class;
 import gr.nlamp.sfgame_backend.enums.Gender;
 import gr.nlamp.sfgame_backend.enums.Race;
+import gr.nlamp.sfgame_backend.guild.GuildInvitation;
+import gr.nlamp.sfgame_backend.guild.GuildMember;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -32,7 +37,7 @@ public class Player implements Serializable {
     private Long strength;
     private Long dexterity;
     private Long intelligence;
-    private Long witness; // or stamina or endurance
+    private Long constitution;
     private Long luck;
     // Potions
     private Boolean banned;
@@ -52,6 +57,11 @@ public class Player implements Serializable {
     // Album
     // Tavern
     // Guild
+    @OneToOne(mappedBy = "player")
+    private GuildMember guildMember;
+    @OneToMany(mappedBy = "player", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<GuildInvitation> guildInvitations = new HashSet<>();
     // Friends
     // Messages
     // FightLog
@@ -62,4 +72,5 @@ public class Player implements Serializable {
     // WeaponShop
     // MagicShop
     private Boolean goldenFrame;
+    // Face
 }
