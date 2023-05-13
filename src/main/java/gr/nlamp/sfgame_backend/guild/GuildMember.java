@@ -7,26 +7,25 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.UUID;
+import java.math.BigInteger;
 
 @Entity
 @Table(name = "guild_members")
 @Getter
 @Setter
 public class GuildMember implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @EmbeddedId
+    GuildMemberPK guildMemberPK = new GuildMemberPK();
     @ManyToOne(cascade = {CascadeType.PERSIST})
     @JsonIgnore
     @MapsId("guildId")
     private Guild guild;
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "player_id", referencedColumnName = "id")
+    @ManyToOne(cascade = {CascadeType.PERSIST})
     @JsonIgnore
     @MapsId("playerId")
     private Player player;
     private Rank playerRank;
-    private Long silverDonated;
-    private Long mushroomDonated;
+    private BigInteger silverDonated;
+    private BigInteger mushroomDonated;
+    private Boolean isActive;
 }

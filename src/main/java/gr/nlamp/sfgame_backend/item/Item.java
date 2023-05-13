@@ -1,0 +1,35 @@
+package gr.nlamp.sfgame_backend.item;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import gr.nlamp.sfgame_backend.player.Player;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.io.Serializable;
+import java.math.BigInteger;
+import java.util.UUID;
+
+@Entity
+@Table(name = "items")
+@Getter
+@Setter
+public class Item implements Serializable {
+    @Id
+    private UUID id;
+    @ManyToOne(cascade = {CascadeType.PERSIST})
+    @JsonIgnore
+    private Player player;
+    private ItemType itemType;
+    private SlotType slotType;
+    private Boolean isLegendary;
+    private Integer itemId; // image-file-name-in-directories-with-all-items
+    private Integer strength;
+    private Integer dexterity;
+    private Integer intelligence;
+    private Integer constitution;
+    private Integer luck;
+    private Integer armor;
+    private BigInteger silverCost;
+    private BigInteger mushCost;
+}
