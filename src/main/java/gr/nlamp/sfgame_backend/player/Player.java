@@ -6,7 +6,7 @@ import gr.nlamp.sfgame_backend.guild.GuildMember;
 import gr.nlamp.sfgame_backend.guild.GuildMessage;
 import gr.nlamp.sfgame_backend.item.Item;
 import gr.nlamp.sfgame_backend.magic_mirror.MagicMirror;
-import gr.nlamp.sfgame_backend.tavern.Tavern;
+import gr.nlamp.sfgame_backend.tavern.Quest;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -62,8 +62,12 @@ public class Player implements Serializable {
     @OneToOne(mappedBy = "player")
     private MagicMirror magicMirror;
     // Album
-    @OneToOne(mappedBy = "player")
-    private Tavern tavern;
+    private Integer thirst; // renew every day 6000 (max=6000)
+    private Short beers; // min=0, max=10
+    @OneToMany(mappedBy = "player", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore
+    @ToString.Exclude
+    private Set<Quest> quests = new HashSet<>();
     @OneToMany(mappedBy = "player", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
     @ToString.Exclude

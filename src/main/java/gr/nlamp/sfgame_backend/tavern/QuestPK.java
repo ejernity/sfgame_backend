@@ -1,4 +1,4 @@
-package gr.nlamp.sfgame_backend.guild;
+package gr.nlamp.sfgame_backend.tavern;
 
 import jakarta.persistence.Embeddable;
 import lombok.*;
@@ -12,7 +12,7 @@ import java.util.UUID;
 @Embeddable
 @Getter
 @Setter
-public class GuildMemberPK implements Serializable {
-    protected UUID guildId;
+public class QuestPK implements Serializable {
     protected UUID playerId;
+    protected Short orderNo;
 }

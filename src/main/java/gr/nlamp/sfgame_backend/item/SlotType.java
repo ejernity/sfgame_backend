@@ -4,5 +4,6 @@ public enum SlotType {
     EQUIPMENT,
     BAG,
     WEAPON_SHOP,
-    MAGIC_SHOP
+    MAGIC_SHOP,
+    QUEST
 }
