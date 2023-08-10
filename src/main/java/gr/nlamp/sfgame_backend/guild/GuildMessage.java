@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 @Entity
 @Table(name = "guild_messages")
@@ -14,7 +13,8 @@ import java.util.UUID;
 @Setter
 public class GuildMessage implements Serializable {
     @Id
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @ManyToOne(cascade = {CascadeType.PERSIST})
     private Guild guild;
     @ManyToOne(cascade = {CascadeType.PERSIST})

@@ -4,7 +4,6 @@ import jakarta.persistence.Embeddable;
 import lombok.*;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,6 +12,6 @@ import java.util.UUID;
 @Getter
 @Setter
 public class GuildMemberPK implements Serializable {
-    protected UUID guildId;
-    protected UUID playerId;
+    protected Long guildId;
+    protected Long playerId;
 }

@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 @Entity
 @Table(name = "magic_mirrors")
@@ -14,9 +13,10 @@ import java.util.UUID;
 @Setter
 public class MagicMirror implements Serializable {
     @Id
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
+    @JoinColumn(name = "player_id", nullable = false, unique = true)
     private Player player;
     private Boolean shardOfClumsiness;
     private Boolean shardOfMultitaskers;

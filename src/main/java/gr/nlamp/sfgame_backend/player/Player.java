@@ -16,7 +16,6 @@ import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Table(name = "players")
@@ -24,8 +23,8 @@ import java.util.UUID;
 @Setter
 public class Player implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @Column(unique = true, nullable = false, updatable = false)
     private String username;
     private String password;

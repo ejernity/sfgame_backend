@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 @Entity
 @Table(name = "guild_invitations")
@@ -15,8 +14,8 @@ import java.util.UUID;
 @Setter
 public class GuildInvitation implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @ManyToOne(cascade = {CascadeType.PERSIST})
     @JsonIgnore
     @MapsId("guildId")

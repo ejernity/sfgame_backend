@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 @Entity
 @Table(name = "boosters")
@@ -14,7 +13,8 @@ import java.util.UUID;
 @Setter
 public class Booster implements Serializable {
     @Id
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @ManyToOne(cascade = {CascadeType.PERSIST})
     private Player player;
     private PotionType potionType;

@@ -4,7 +4,6 @@ import jakarta.persistence.Embeddable;
 import lombok.*;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,6 +12,6 @@ import java.util.UUID;
 @Getter
 @Setter
 public class QuestPK implements Serializable {
-    protected UUID playerId;
+    protected Long playerId;
     protected Short orderNo;
 }

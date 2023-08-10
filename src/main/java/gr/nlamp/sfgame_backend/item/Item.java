@@ -8,7 +8,6 @@ import lombok.Setter;
 
 import java.io.Serializable;
 import java.math.BigInteger;
-import java.util.UUID;
 
 @Entity
 @Table(name = "items")
@@ -16,7 +15,8 @@ import java.util.UUID;
 @Setter
 public class Item implements Serializable {
     @Id
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @ManyToOne(cascade = {CascadeType.PERSIST})
     @JsonIgnore
     private Player player;
