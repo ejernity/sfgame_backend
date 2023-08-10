@@ -20,19 +20,27 @@ public class Guild implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true, nullable = false, updatable = false)
+
     private String name;
+
     private String description;
+
     private BigInteger honor;
+
     private Integer treasureLevel;
+
     private Integer instructorLevel;
+
     @OneToMany(mappedBy = "guild", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
     @ToString.Exclude
     private Set<GuildInvitation> guildInvitations = new HashSet<>();
+
     @OneToMany(mappedBy = "guild", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
     @ToString.Exclude
     private Set<GuildMember> guildMembers = new HashSet<>();
+
     @OneToMany(mappedBy = "guild", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
     @ToString.Exclude

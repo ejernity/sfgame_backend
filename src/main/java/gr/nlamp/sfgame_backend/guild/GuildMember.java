@@ -16,16 +16,24 @@ import java.math.BigInteger;
 public class GuildMember implements Serializable {
     @EmbeddedId
     GuildMemberPK guildMemberPK = new GuildMemberPK();
+
     @ManyToOne(cascade = {CascadeType.PERSIST})
     @JsonIgnore
     @MapsId("guildId")
     private Guild guild;
+
     @ManyToOne(cascade = {CascadeType.PERSIST})
     @JsonIgnore
     @MapsId("playerId")
     private Player player;
+
+    @Column(columnDefinition = "ENUM('LEADER','OFFICER','MEMBER')")
+    @Enumerated(value = EnumType.STRING)
     private Rank playerRank;
+
     private BigInteger silverDonated;
+
     private BigInteger mushroomDonated;
+
     private Boolean isActive;
 }

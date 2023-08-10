@@ -17,13 +17,20 @@ import java.math.BigInteger;
 public class Quest implements Serializable {
     @EmbeddedId
     QuestPK questPK = new QuestPK();
+
     @ManyToOne(cascade = {CascadeType.PERSIST})
     @JsonIgnore
     @MapsId("playerId")
     private Player player;
+
     private Integer duration;
+
     private BigInteger silver;
+
     private BigInteger experience;
+
+    private Boolean itemReward;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "item_id", referencedColumnName = "id")
     private Item item;

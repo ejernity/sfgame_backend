@@ -15,11 +15,15 @@ public class GuildMessage implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne(cascade = {CascadeType.PERSIST})
     private Guild guild;
+
     @ManyToOne(cascade = {CascadeType.PERSIST})
     private Player player;
+
     private Long timeStamp;
-    @Lob
+
+    @Column(columnDefinition = "TEXT")
     private String message;
 }

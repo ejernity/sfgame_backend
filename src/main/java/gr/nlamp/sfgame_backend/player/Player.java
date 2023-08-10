@@ -6,6 +6,7 @@ import gr.nlamp.sfgame_backend.guild.GuildMember;
 import gr.nlamp.sfgame_backend.guild.GuildMessage;
 import gr.nlamp.sfgame_backend.item.Item;
 import gr.nlamp.sfgame_backend.magic_mirror.MagicMirror;
+import gr.nlamp.sfgame_backend.stable.Mount;
 import gr.nlamp.sfgame_backend.tavern.Quest;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -14,7 +15,9 @@ import lombok.ToString;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -25,68 +28,118 @@ public class Player implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(unique = true, nullable = false, updatable = false)
     private String username;
+
     private String password;
+
     @Column(unique = true, nullable = false)
     private String email;
+
     private String description;
+
     private BigInteger honor;
+
     private Long highestRank;
+
     private Integer highestActiveFor; // in days
     private Integer activeFor; // in days
+
     private Long numberOfSuccessQuests;
+
     private BigInteger strength;
     private BigInteger dexterity;
     private BigInteger intelligence;
     private BigInteger constitution;
     private BigInteger luck;
+
     private Boolean banned;
+
     private Boolean emailActivation;
     private Long emailActivationDate;
+
     private Long lastLoginDate;
+
+    @Column(columnDefinition = "ENUM('WARRIOR','MAGE','SCOUT','ASSASSIN','BATTLE_MAGE','BERSERKER','DEMON_HUNTER','DRUID','BARD')")
+    @Enumerated(value = EnumType.STRING)
     private Class playerClass;
+
+    @Column(columnDefinition = "ENUM('HUMAN','ELF','DWARF','GNOME','ORC','DARC_ELF','GOBLIN','DEMON')")
+    @Enumerated(value = EnumType.STRING)
     private Race race;
+
+    @Column(columnDefinition = "ENUM('MALE','FEMALE')")
+    @Enumerated(value = EnumType.STRING)
     private Gender gender;
+
     private BigInteger silver; // 100 silver = 1 coin
+
     private Long mushrooms;
+
     private Long level;
-    private BigInteger experience;
+
+    private BigInteger gainedExperience;
+
     @OneToMany(mappedBy = "player", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
     @ToString.Exclude
     private Set<Booster> boosters = new HashSet<>();
-    // Mount
+
+    @Column(columnDefinition = "ENUM('PIG','DONKEY','TIGER','DRAGON')")
+    @Enumerated(value = EnumType.STRING)
+    private Mount mount;
     private Long mountTime; // when mount bought
+
     @OneToOne(mappedBy = "player")
     private MagicMirror magicMirror;
+
     // Album
+
     private Integer thirst; // renew every day 6000 (max=6000)
+
     private Short beers; // min=0, max=10
+
     @OneToMany(mappedBy = "player", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
     @ToString.Exclude
     private Set<Quest> quests = new HashSet<>();
+
     @OneToMany(mappedBy = "player", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
     @ToString.Exclude
     private Set<GuildMember> guildMembers = new HashSet<>();
+
     @OneToMany(mappedBy = "player", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
     @ToString.Exclude
     private Set<GuildInvitation> guildInvitations = new HashSet<>();
+
     @OneToMany(mappedBy = "player", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
     @ToString.Exclude
     private Set<GuildMessage> guildMessages = new HashSet<>();
-    // Friends
+
+    @ManyToMany
+    @JoinTable(name = "friends",
+            joinColumns = {@JoinColumn(name = "player_id")},
+            inverseJoinColumns = {@JoinColumn(name = "friend_id")})
+    private List<Player> friends = new ArrayList<>();
+
     // Messages
+
     // FightLog
+
     // Pets
+
     // Fortress
+
     private Boolean goldenFrame;
+
     // Face
+
     // Achievements
+
     @OneToMany(mappedBy = "player", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
     @ToString.Exclude

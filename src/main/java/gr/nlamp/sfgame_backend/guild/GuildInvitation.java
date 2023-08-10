@@ -16,13 +16,18 @@ public class GuildInvitation implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne(cascade = {CascadeType.PERSIST})
     @JsonIgnore
     @MapsId("guildId")
     private Guild guild;
+
     @ManyToOne(cascade = {CascadeType.PERSIST})
     @JsonIgnore
     @MapsId("playerId")
     private Player player;
+
+    @Column(columnDefinition = "ENUM('ON_HOLD','ACCEPTED','REJECTED'")
+    @Enumerated(value = EnumType.STRING)
     private GuildInvitationStatus status;
 }
