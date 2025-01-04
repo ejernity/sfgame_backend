@@ -24,7 +24,7 @@ import java.util.Set;
 @Table(name = "players")
 @Getter
 @Setter
-public class Player implements Serializable {
+public class Player {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -56,7 +56,7 @@ public class Player implements Serializable {
 
     private Boolean banned;
 
-    private Boolean emailActivation;
+    private Boolean emailActivation = false;
     private Long emailActivationDate;
 
     private Long lastLoginDate;
@@ -73,7 +73,7 @@ public class Player implements Serializable {
     @Enumerated(value = EnumType.STRING)
     private Gender gender;
 
-    private BigInteger silver; // 100 silver = 1 coin
+    private BigInteger coins;
 
     private Long mushrooms;
 
@@ -96,9 +96,11 @@ public class Player implements Serializable {
 
     // Album
 
-    private Integer thirst; // renew every day 6000 (max=6000)
+    private Integer thirst; // min = 0, max = 300
 
-    private Short beers; // min=0, max=10
+    private Integer totalThirst; // total day's thirst (300 + beers)
+
+    private Integer beers; // min=0, max=10
 
     @OneToMany(mappedBy = "player", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore

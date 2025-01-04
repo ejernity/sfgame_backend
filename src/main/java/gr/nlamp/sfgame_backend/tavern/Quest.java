@@ -25,11 +25,13 @@ public class Quest implements Serializable {
 
     private Integer duration;
 
-    private BigInteger silver;
+    private BigInteger coins;
 
     private BigInteger experience;
 
     private Boolean itemReward;
+
+    private Long mushrooms;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "item_id", referencedColumnName = "id")

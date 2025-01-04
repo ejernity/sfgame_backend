@@ -35,5 +35,4 @@ public class GuildMember implements Serializable {
 
     private BigInteger mushroomDonated;
 
-    private Boolean isActive;
 }
