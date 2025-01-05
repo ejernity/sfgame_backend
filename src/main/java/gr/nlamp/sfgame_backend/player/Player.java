@@ -13,7 +13,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -41,6 +40,7 @@ public class Player {
 
     private BigInteger honor;
 
+    private Long currentRank;
     private Long highestRank;
 
     private Integer highestActiveFor; // in days
@@ -89,7 +89,7 @@ public class Player {
     @Column(columnDefinition = "ENUM('PIG','DONKEY','TIGER','DRAGON')")
     @Enumerated(value = EnumType.STRING)
     private Mount mount;
-    private Long mountTime; // when mount bought
+    private Long mountActiveUntil; // when mount bought
 
     @OneToOne(mappedBy = "player")
     private MagicMirror magicMirror;

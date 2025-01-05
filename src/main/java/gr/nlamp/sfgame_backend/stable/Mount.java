@@ -9,12 +9,12 @@ public enum Mount {
     TIGER(0.25, 14, 5, 25),
     DRAGON(0.50, 14, 25, 0);
 
-    private double percentageBooster;
-    private int duration;
-    private int mushCost;
-    private int coinCost;
+    private final double percentageBooster;
+    private final int duration;
+    private final int mushCost;
+    private final int coinCost;
 
-    Mount(double percentageBooster, int duration, int mushCost, int coinCost) {
+    Mount(final double percentageBooster, final int duration, final int mushCost, final int coinCost) {
         this.percentageBooster = percentageBooster;
         this.duration = duration;
         this.mushCost = mushCost;

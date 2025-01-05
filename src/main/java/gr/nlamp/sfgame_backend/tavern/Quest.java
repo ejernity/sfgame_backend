@@ -29,7 +29,7 @@ public class Quest implements Serializable {
 
     private BigInteger experience;
 
-    private Boolean itemReward;
+    private Boolean itemReward = false;
 
     private Long mushrooms;
 
