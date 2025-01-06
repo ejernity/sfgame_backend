@@ -26,22 +26,24 @@ public class Item implements Serializable {
     @Enumerated(value = EnumType.STRING)
     private ItemType itemType;
 
-    @Column(columnDefinition = "ENUM('EQUIPMENT','BAG','WEAPON_SHOP','MAGIC_SHOP','QUEST')")
+    @Column(columnDefinition = "ENUM('EQUIPMENT','BAG_1','BAG_2','BAG_3','BAG_4','BAG_5','BAG_6','BAG_7','BAG_8','BAG_9','BAG_10','BAG_11','BAG_12','BAG_13','BAG_14','BAG_15','BAG_16','WEAPON_SHOP_1','WEAPON_SHOP_2','WEAPON_SHOP_3','WEAPON_SHOP_4','WEAPON_SHOP_5','WEAPON_SHOP_6','MAGIC_SHOP_1','MAGIC_SHOP_2','MAGIC_SHOP_3','MAGIC_SHOP_4','MAGIC_SHOP_5','MAGIC_SHOP_6','QUEST')")
     @Enumerated(value = EnumType.STRING)
     private SlotType slotType;
 
-    private Boolean isLegendary;
+    @Column(columnDefinition = "ENUM('COMMON','EPIC','LEGENDARY')")
+    @Enumerated(value = EnumType.STRING)
+    private ItemRarity itemRarity;
 
     private Integer itemId; // image-file-name-in-directories-with-all-items
 
-    private Integer strength;
-    private Integer dexterity;
-    private Integer intelligence;
-    private Integer constitution;
-    private Integer luck;
+    private Integer strength = 0;
+    private Integer dexterity = 0;
+    private Integer intelligence = 0;
+    private Integer constitution = 0;
+    private Integer luck = 0;
 
-    private Integer armor;
+    private Integer armor = 0;
 
-    private BigInteger silverCost;
+    private BigInteger coinCost;
     private BigInteger mushCost;
 }

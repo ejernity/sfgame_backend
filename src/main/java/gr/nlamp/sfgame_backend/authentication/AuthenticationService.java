@@ -3,10 +3,15 @@ package gr.nlamp.sfgame_backend.authentication;
 import gr.nlamp.sfgame_backend.appcontext.ApplicationContextProvider;
 import gr.nlamp.sfgame_backend.authentication.validators.PlayerEmailExistsValidator;
 import gr.nlamp.sfgame_backend.authentication.validators.PlayerUsernameExistsValidator;
+import gr.nlamp.sfgame_backend.item.Item;
+import gr.nlamp.sfgame_backend.item.ItemGenerator;
+import gr.nlamp.sfgame_backend.item.ItemType;
+import gr.nlamp.sfgame_backend.item.SlotType;
 import gr.nlamp.sfgame_backend.player.Player;
 import gr.nlamp.sfgame_backend.player.PlayerRepository;
+import gr.nlamp.sfgame_backend.player.PlayerState;
 import gr.nlamp.sfgame_backend.tavern.QuestRepository;
-import gr.nlamp.sfgame_backend.tavern.QuestsGenerator;
+import gr.nlamp.sfgame_backend.tavern.QuestGenerator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,8 +24,8 @@ import java.util.List;
 public class AuthenticationService {
 
     private final PlayerRepository playerRepository;
-    private final QuestRepository questRepository;
-    private final QuestsGenerator questsGenerator;
+    private final QuestGenerator questGenerator;
+    private final ItemGenerator itemGenerator;
 
     private final List<AuthenticationValidator> validators = List.of(
             ApplicationContextProvider.getApplicationContext().getBean(PlayerUsernameExistsValidator.class),
@@ -37,10 +42,11 @@ public class AuthenticationService {
         initializePlayerSkills(player);
         initializePlayerResources(player);
         playerRepository.saveAndFlush(player);
-        questsGenerator.generateQuests(player, true);
-        // generate equipped items
-        // generate weapon shop items
-        // generate magic shop items
+        questGenerator.generateQuests(player, true);
+        final Item initialWeapon = itemGenerator.generateItem(player, SlotType.EQUIPMENT, ItemType.WEAPON);
+        player.getItems().add(initialWeapon);
+        itemGenerator.generateWeaponShopItems(player, true);
+        itemGenerator.generateMagicShopItems(player, true);
         playerRepository.save(player);
     }
 
@@ -69,6 +75,7 @@ public class AuthenticationService {
         player.setPlayerClass(registrationDto.getPlayerClass());
         player.setRace(registrationDto.getRace());
         player.setGender(registrationDto.getGender());
+        player.setPlayerState(PlayerState.IDLE);
         player.setGoldenFrame(false);
         player.setActiveFor(1);
         player.setHighestActiveFor(1);

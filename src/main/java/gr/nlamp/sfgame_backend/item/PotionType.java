@@ -21,8 +21,8 @@ public enum PotionType {
     LUCK_LARGE(0.25, 3),
     ETERNAL_LIFE(0.25, 7);
 
-    private Double percentage;
-    private Integer days;
+    private final double percentage;
+    private final Integer days;
 
     PotionType(double percentage, int days) {
         this.percentage = percentage;

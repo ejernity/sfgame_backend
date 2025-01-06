@@ -15,13 +15,16 @@ import java.math.BigInteger;
 @Getter
 @Setter
 public class Quest implements Serializable {
-    @EmbeddedId
-    QuestPK questPK = new QuestPK();
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne(cascade = {CascadeType.PERSIST})
-    @JsonIgnore
-    @MapsId("playerId")
     private Player player;
+
+    // TODO Add random title and description
+
+    private Short orderNo;
 
     private Integer duration;
 
@@ -29,9 +32,13 @@ public class Quest implements Serializable {
 
     private BigInteger experience;
 
-    private Boolean itemReward = false;
+    private Boolean hasItemReward = false;
 
     private Long mushrooms;
+
+    private Boolean isChosen = false;
+
+    private Long chosenAt;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "item_id", referencedColumnName = "id")

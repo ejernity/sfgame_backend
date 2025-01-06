@@ -61,7 +61,7 @@ public class Player {
 
     private Long lastLoginDate;
 
-    @Column(columnDefinition = "ENUM('WARRIOR','MAGE','SCOUT','ASSASSIN','BATTLE_MAGE','BERSERKER','DEMON_HUNTER','DRUID','BARD')")
+    @Column(columnDefinition = "ENUM('WARRIOR','MAGE','SCOUT')")
     @Enumerated(value = EnumType.STRING)
     private Class playerClass;
 
@@ -72,6 +72,10 @@ public class Player {
     @Column(columnDefinition = "ENUM('MALE','FEMALE')")
     @Enumerated(value = EnumType.STRING)
     private Gender gender;
+
+    @Column(columnDefinition = "ENUM('IDLE','QUEST','CITY_GUARD')")
+    @Enumerated(value = EnumType.STRING)
+    private PlayerState playerState;
 
     private BigInteger coins;
 
