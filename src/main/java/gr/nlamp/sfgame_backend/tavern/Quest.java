@@ -1,6 +1,5 @@
 package gr.nlamp.sfgame_backend.tavern;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import gr.nlamp.sfgame_backend.item.Item;
 import gr.nlamp.sfgame_backend.player.Player;
 import jakarta.persistence.*;

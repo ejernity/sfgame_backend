@@ -17,6 +17,7 @@ public class MountService {
     @Transactional(rollbackOn = Exception.class)
     public void buyMount(final long playerId, final Mount mount) {
         final Player player = getPlayer(playerId);
+        clearInactiveMount(player);
         if (player.getCoins().compareTo(BigInteger.valueOf(mount.getCoinCost())) < 0 || mount.getMushCost() > player.getMushrooms())
             throw new RuntimeException("Player do not have enough resources to buy the mount.");
         final long mountDurationInMs = mount.getDuration() * 86400000;
@@ -35,5 +36,14 @@ public class MountService {
         if (player == null)
             throw new RuntimeException("Player not found");
         return player;
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    public void clearInactiveMount(final Player player) {
+        if (player.getMount() != null && player.getMountActiveUntil() < System.currentTimeMillis()) {
+            player.setMount(null);
+            player.setMountActiveUntil(null);
+            playerRepository.save(player);
+        }
     }
 }

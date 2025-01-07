@@ -3,6 +3,7 @@ package gr.nlamp.sfgame_backend.tavern;
 import gr.nlamp.sfgame_backend.player.Player;
 import gr.nlamp.sfgame_backend.player.PlayerRepository;
 import gr.nlamp.sfgame_backend.player.PlayerState;
+import gr.nlamp.sfgame_backend.stable.MountService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,12 +19,14 @@ public class QuestService {
     private final QuestRepository questRepository;
     private final PlayerRepository playerRepository;
     private final QuestGenerator questGenerator;
+    private final MountService mountService;
     private final QuestMapper questMapper = QuestMapper.INSTANCE;
 
     private static final int BEER_ENERGY = 20;
 
     public QuestsDto getAll(final long playerId) {
         final List<Quest> quests = questRepository.findAllByPlayerId(playerId);
+        mountService.clearInactiveMount(quests.get(0).getPlayer());
         return new QuestsDto(questMapper.mapList(quests));
     }
 
@@ -50,6 +53,7 @@ public class QuestService {
         final Player player = getPlayer(playerId);
         validatePlayerState(player, PlayerState.QUEST);
         final Quest quest = getChosenQuest(playerId);
+        mountService.clearInactiveMount(player);
         validateQuestForCancel(quest);
         quest.setIsChosen(false);
         quest.setChosenAt(null);
@@ -61,6 +65,7 @@ public class QuestService {
         final Player player = getPlayer(playerId);
         validatePlayerState(player, PlayerState.QUEST);
         final Quest quest = getChosenQuest(playerId);
+        mountService.clearInactiveMount(player);
         validateQuestForFinish(quest);
         player.setPlayerState(PlayerState.IDLE);
         player.setCoins(player.getCoins().add(quest.getCoins()));
