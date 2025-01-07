@@ -48,25 +48,25 @@ public class QuestGenerator {
             quest.setOrderNo(questNumber);
 
             // Random decision for the quest duration
-            int baseDuration = DURATIONS[random.nextInt(DURATIONS.length)];
-            if (player.getMount() != null) {
-                final double booster = player.getMount().getPercentageBooster();
-                baseDuration = (int) Math.ceil(baseDuration * booster);
-            }
-            quest.setDuration(baseDuration);
+            final BigDecimal duration = BigDecimal.valueOf(DURATIONS[random.nextInt(DURATIONS.length)]);
+            quest.setDuration(duration);
 
             // Coins calculation with randomness
             final double coinMultiplier = 1 + (0.02 * treasureLevel);
             final double randomCoinFactor = 0.9 + (0.2 * random.nextDouble()); // Range [0.9, 1.1]
-            final BigInteger coins = BigDecimal.valueOf(baseDuration * level * coinMultiplier * randomCoinFactor)
-                    .toBigInteger();
+            final BigInteger coins =
+                    duration.multiply(duration)
+                            .multiply(BigDecimal.valueOf(level * coinMultiplier * randomCoinFactor))
+                            .toBigInteger();
             quest.setCoins(coins);
 
             // Experience calculation with randomness
             final double experienceMultiplier = 1 + (0.02 * instructorLevel);
             final double randomExperienceFactor = 0.85 + (0.3 * random.nextDouble()); // Range [0.85, 1.15]
-            final BigInteger experience = BigDecimal.valueOf(baseDuration * level * experienceMultiplier * randomExperienceFactor)
-                    .toBigInteger();
+            final BigInteger experience =
+                    duration.multiply(duration)
+                            .multiply(BigDecimal.valueOf(level * experienceMultiplier * randomExperienceFactor))
+                            .toBigInteger();
             quest.setExperience(experience);
 
             // Random number of mushrooms as a reward

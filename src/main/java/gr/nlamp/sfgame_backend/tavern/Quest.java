@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 @Entity
@@ -26,7 +27,8 @@ public class Quest implements Serializable {
 
     private Short orderNo;
 
-    private Integer duration;
+    @Column(precision = 4, scale = 2)
+    private BigDecimal duration;
 
     private BigInteger coins;
 

@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -100,11 +101,13 @@ public class Player {
 
     // Album
 
-    private Integer thirst; // min = 0, max = 300
+    @Column(precision = 5, scale = 2)
+    private BigDecimal currentEnergy; // min = 0, max = 100
 
-    private Integer totalThirst; // total day's thirst (300 + beers)
+    @Column(precision = 5, scale = 2)
+    private BigDecimal totalUsedEnergy; // total day's energy (100 + 200 from beers)
 
-    private Integer beers; // min=0, max=10
+    private Integer totalBeersDrink; // min=0, max=10
 
     @OneToMany(mappedBy = "player", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore

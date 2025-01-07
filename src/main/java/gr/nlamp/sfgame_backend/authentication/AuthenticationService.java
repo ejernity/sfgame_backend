@@ -10,12 +10,12 @@ import gr.nlamp.sfgame_backend.item.SlotType;
 import gr.nlamp.sfgame_backend.player.Player;
 import gr.nlamp.sfgame_backend.player.PlayerRepository;
 import gr.nlamp.sfgame_backend.player.PlayerState;
-import gr.nlamp.sfgame_backend.tavern.QuestRepository;
 import gr.nlamp.sfgame_backend.tavern.QuestGenerator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -55,8 +55,9 @@ public class AuthenticationService {
         player.setMushrooms(10L);
         player.setLevel(1L);
         player.setGainedExperience(BigInteger.ZERO);
-        player.setThirst(300);
-        player.setBeers(10);
+        player.setCurrentEnergy(BigDecimal.valueOf(100));
+        player.setTotalUsedEnergy(BigDecimal.ZERO);
+        player.setTotalBeersDrink(0);
     }
 
     private void initializePlayerSkills(final Player player) {
@@ -80,7 +81,6 @@ public class AuthenticationService {
         player.setActiveFor(1);
         player.setHighestActiveFor(1);
         player.setGainedExperience(BigInteger.ZERO);
-        player.setTotalThirst(0);
         player.setBanned(false);
         player.setHonor(BigInteger.ZERO);
         player.setLastLoginDate(System.currentTimeMillis());

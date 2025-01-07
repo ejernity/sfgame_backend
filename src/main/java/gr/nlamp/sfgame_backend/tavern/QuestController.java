@@ -18,10 +18,10 @@ public class QuestController {
         return new ResponseEntity<>(questService.getAll(playerId), HttpStatus.OK);
     }
 
-    @PostMapping("{playerId}/{orderNo}")
+    @PostMapping("{playerId}/{questId}")
     public ResponseEntity<Void> start(@PathVariable("playerId") final long playerId,
-                                      @PathVariable("orderNo") final short orderNo) {
-        questService.start(playerId, orderNo);
+                                      @PathVariable("questId") final long questId) {
+        questService.start(playerId, questId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -34,6 +34,12 @@ public class QuestController {
     @GetMapping("{playerId}/finish")
     public ResponseEntity<RewardDto> finish(@PathVariable("playerId") final long playerId) {
         return new ResponseEntity<>(questService.finish(playerId), HttpStatus.OK);
+    }
+
+    @GetMapping("{playerId}/drink-beer")
+    public ResponseEntity<?> drinkBeer(@PathVariable("playerId") final long playerId) {
+        questService.drinkBeer(playerId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

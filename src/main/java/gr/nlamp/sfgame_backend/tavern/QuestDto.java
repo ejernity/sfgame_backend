@@ -4,14 +4,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 @Getter
 @Setter
 @NoArgsConstructor
 public class QuestDto {
+    private long id;
     private short orderNo;
-    private int duration;
+    private BigDecimal duration;
     private BigInteger coins;
     private BigInteger experience;
     private Boolean hasItemReward;

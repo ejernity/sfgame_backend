@@ -20,6 +20,4 @@ public interface QuestRepository extends JpaRepository<Quest, Long> {
     @Query("DELETE FROM Quest q WHERE q.player.id = :playerId")
     void deleteAllByPlayerId(@Param("playerId") final long playerId);
 
-    Optional<Quest> findByPlayerIdAndOrderNo(final long playerId, final short orderNo);
-
 }

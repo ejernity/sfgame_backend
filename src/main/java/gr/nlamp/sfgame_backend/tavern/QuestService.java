@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,19 +20,29 @@ public class QuestService {
     private final QuestGenerator questGenerator;
     private final QuestMapper questMapper = QuestMapper.INSTANCE;
 
+    private static final int BEER_ENERGY = 20;
+
     public QuestsDto getAll(final long playerId) {
         final List<Quest> quests = questRepository.findAllByPlayerId(playerId);
         return new QuestsDto(questMapper.mapList(quests));
     }
 
     @Transactional(rollbackOn = Exception.class)
-    public void start(final long playerId, final short orderNo) {
+    public void start(final long playerId, final long questId) {
         final Player player = getPlayer(playerId);
         validatePlayerState(player, PlayerState.IDLE);
-        final Quest quest = getQuest(playerId, orderNo);
+        final Quest quest = getQuest(player, questId);
+        validatePlayerEnergyForQuest(player, quest);
         quest.setIsChosen(true);
         quest.setChosenAt(System.currentTimeMillis());
         player.setPlayerState(PlayerState.QUEST);
+    }
+
+    private void validatePlayerEnergyForQuest(final Player player, final Quest quest) {
+        final BigDecimal questEnergy = quest.getDuration();
+        final BigDecimal playerEnergy = player.getCurrentEnergy();
+        if (questEnergy.compareTo(playerEnergy) > 0)
+            throw new RuntimeException("Not enough energy.");
     }
 
     @Transactional(rollbackOn = Exception.class)
@@ -55,6 +66,10 @@ public class QuestService {
         player.setCoins(player.getCoins().add(quest.getCoins()));
         player.setMushrooms(player.getMushrooms() + quest.getMushrooms());
         player.setGainedExperience(player.getGainedExperience().add(quest.getExperience()));
+        final BigDecimal mountBooster = player.getMount() != null ? BigDecimal.valueOf(player.getMount().getPercentageBooster()) : BigDecimal.ONE;
+        player.setCurrentEnergy(player.getCurrentEnergy().subtract(quest.getDuration().multiply(mountBooster)));
+        player.setTotalUsedEnergy(player.getTotalUsedEnergy().add(quest.getDuration().multiply(mountBooster)));
+        player.setNumberOfSuccessQuests(player.getNumberOfSuccessQuests() + 1);
         questGenerator.generateQuests(player, false);
         // TODO check for level up
         // TODO Add item in bag if quest gives an item.
@@ -62,10 +77,38 @@ public class QuestService {
         return questMapper.toRewardDto(quest);
     }
 
+    @Transactional(rollbackOn = Exception.class)
+    public void drinkBeer(final long playerId) {
+        final Player player = getPlayer(playerId);
+        validatePlayerState(player, PlayerState.IDLE);
+        validatePlayerCanDrinkBeer(player);
+        player.setMushrooms(player.getMushrooms() - 1);
+        player.setCurrentEnergy(player.getCurrentEnergy().add(BigDecimal.valueOf(BEER_ENERGY)));
+        player.setTotalBeersDrink(player.getTotalBeersDrink() + 1);
+    }
+
+    private void validatePlayerCanDrinkBeer(final Player player) {
+        // player has reached maximum beers for today
+        if (player.getTotalBeersDrink() == 10)
+            throw new RuntimeException("Player has already drank all beers for today.");
+        // player has not enough mushrooms
+        if (player.getMushrooms() == 0)
+            throw new RuntimeException("Player has no mushrooms to buy a beer.");
+        // player has current energy less than or equal to 80 (because each beer gives 20 energy), otherwise error
+        if (player.getCurrentEnergy().compareTo(BigDecimal.valueOf(80)) > 0)
+            throw new RuntimeException("Player has enough energy to do a quest.");
+        // player reached maximum energy for today
+        if (player.getTotalUsedEnergy().compareTo(BigDecimal.valueOf(300)) == 0)
+            throw new RuntimeException("Player has reached maximum used energy.");
+    }
+
     private void validateQuestForCancel(final Quest quest) {
         if (!quest.getIsChosen())
             throw new RuntimeException("Quest is not chosen, so it cannot be canceled.");
-        final long durationInMillis = quest.getDuration() * 60 * 1000;
+        long durationInMillis = (long) quest.getDuration().toBigInteger().intValue() * 60 * 1000;
+        final Player player = quest.getPlayer();
+        if (player.getMount() != null)
+            durationInMillis = (long) (player.getMount().getPercentageBooster() * durationInMillis);
         if (quest.getChosenAt() + durationInMillis <= System.currentTimeMillis())
             throw new RuntimeException("Quest has finished, so it cannot be canceled.");
     }
@@ -73,16 +116,22 @@ public class QuestService {
     private void validateQuestForFinish(final Quest quest) {
         if (!quest.getIsChosen())
             throw new RuntimeException("Quest is not chosen, so it cannot be finished.");
-        final long durationInMillis = quest.getDuration() * 60 * 1000;
+        long durationInMillis = (long) quest.getDuration().toBigInteger().intValue() * 60 * 1000;
+        final Player player = quest.getPlayer();
+        if (player.getMount() != null)
+            durationInMillis = (long) (player.getMount().getPercentageBooster() * durationInMillis);
         if (quest.getChosenAt() + durationInMillis > System.currentTimeMillis())
             throw new RuntimeException("Quest has not finished yet.");
     }
 
-    private Quest getQuest(final long playerId, final short orderNo) {
-        final Optional<Quest> optionalQuest = questRepository.findByPlayerIdAndOrderNo(playerId, orderNo);
+    private Quest getQuest(final Player player, final long questId) {
+        final Optional<Quest> optionalQuest = questRepository.findById(questId);
         if (optionalQuest.isEmpty())
             throw new RuntimeException("Quest not found");
 
+        final Quest quest = optionalQuest.get();
+        if (!quest.getPlayer().equals(player))
+            throw new RuntimeException("You cannot start quest of another player.");
         return optionalQuest.get();
     }
 
@@ -103,7 +152,6 @@ public class QuestService {
 
     private void validatePlayerState(final Player player, final PlayerState state) {
         if (!player.getPlayerState().equals(state))
-            throw new RuntimeException("Player is not idle");
+            throw new RuntimeException(String.format("Player is not in state %s", state.name()));
     }
-
 }

@@ -1,11 +1,10 @@
 package gr.nlamp.sfgame_backend.tavern;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
-import org.mapstruct.ReportingPolicy;
+import gr.nlamp.sfgame_backend.player.Player;
+import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -15,8 +14,9 @@ public abstract class QuestMapper {
     public abstract List<QuestDto> mapList(List<Quest> questList);
 
     @Mappings({
+            @Mapping(source = "id", target = "id"),
             @Mapping(source = "orderNo", target = "orderNo"),
-            @Mapping(source = "duration", target = "duration"),
+            @Mapping(expression = "java(calculateDuration(quest))", target = "duration"),
             @Mapping(source = "coins", target = "coins"),
             @Mapping(source = "experience", target = "experience"),
             @Mapping(source = "mushrooms", target = "mushrooms"),
@@ -33,4 +33,14 @@ public abstract class QuestMapper {
             @Mapping(source = "mushrooms", target = "mushrooms"),
     })
     public abstract RewardDto toRewardDto(final Quest quest);
+
+    @Named("calculateDuration")
+    public BigDecimal calculateDuration(final Quest quest) {
+        final Player player = quest.getPlayer();
+        if (player.getMount() != null) {
+            final BigDecimal booster = BigDecimal.valueOf(player.getMount().getPercentageBooster());
+            return quest.getDuration().multiply(booster);
+        }
+        return quest.getDuration();
+    }
 }
