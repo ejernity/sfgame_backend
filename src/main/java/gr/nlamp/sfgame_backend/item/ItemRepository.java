@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
@@ -15,6 +16,8 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     @Query("DELETE FROM Item i WHERE i.player.id = :playerId AND i.slotType IN :slotTypes")
     void deleteItemsByPlayerAndSlotTypes(@Param("playerId") final long playerId,
                                          @Param("slotTypes") final List<SlotType> slotTypes);
+
+    Optional<Item> findBySlotTypeAndPlayerId(final SlotType slotType, final long playerId);
 
 }
 
