@@ -45,5 +45,5 @@ public class Item implements Serializable {
     private Integer armor = 0;
 
     private BigInteger coinCost;
-    private BigInteger mushCost;
+    private Long mushCost;
 }

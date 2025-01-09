@@ -90,6 +90,16 @@ public class ItemGenerator {
         itemRepository.deleteItemsByPlayerAndSlotTypes(player.getId(), slotTypes);
     }
 
+    private ItemType pickRandomItemTypeForSlotType(final SlotType slotType) {
+        if (slotType.name().contains("WEAPON")) {
+            return pickRandomWeaponType();
+        } else if (slotType.name().contains("MAGIC")) {
+            return pickRandomMagicType();
+        } else {
+            return null;
+        }
+    }
+
     private ItemType pickRandomWeaponType() {
         return weaponItemTypes.get(new Random().nextInt(weaponItemTypes.size()));
     }
@@ -98,6 +108,10 @@ public class ItemGenerator {
         return magicItemTypes.get(new Random().nextInt(magicItemTypes.size()));
     }
 
+    public final Item generateItem(final Player player, final SlotType slotType) {
+        final ItemType itemType = pickRandomItemTypeForSlotType(slotType);
+        return generateItem(player, slotType, itemType);
+    }
 
     public final Item generateItem(final Player player, final SlotType slotType, final ItemType itemType) {
         if (!validateSlotTypeAndItemType(slotType, itemType)) return null;
@@ -257,7 +271,7 @@ public class ItemGenerator {
 
         // Mushroom cost logic with a higher probability for Epic and Legendary items
         if (Math.random() < getMushroomChance(item)) {
-            int baseMushCost = 1;  // Default base mushroom cost
+            long baseMushCost = 1;  // Default base mushroom cost
             if (item.getItemRarity() == ItemRarity.EPIC) {
                 // Epic items can cost 1 or 2 mushrooms (75% chance for 1, 25% for 2)
                 baseMushCost = (Math.random() < 0.75) ? 1 : 2;
@@ -266,9 +280,9 @@ public class ItemGenerator {
                 baseMushCost = (Math.random() < 0.5) ? 2 : 3;
             }
 
-            item.setMushCost(BigInteger.valueOf(baseMushCost));  // Set mushroom cost
+            item.setMushCost(baseMushCost);  // Set mushroom cost
         } else {
-            item.setMushCost(BigInteger.ZERO);  // No mushroom cost
+            item.setMushCost(0L);  // No mushroom cost
         }
     }
 

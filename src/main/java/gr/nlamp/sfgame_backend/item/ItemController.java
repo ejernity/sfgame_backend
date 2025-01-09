@@ -33,4 +33,18 @@ public class ItemController {
         itemService.unequip(playerId, itemId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("{playerId}/buy/{itemId}")
+    public ResponseEntity<Void> buy(@PathVariable("playerId") final long playerId,
+                                    @PathVariable("itemId") final long itemId) {
+        itemService.buy(playerId, itemId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("{playerId}/sell/{itemId}")
+    public ResponseEntity<Void> sell(@PathVariable("playerId") final long playerId,
+                                    @PathVariable("itemId") final long itemId) {
+        itemService.sell(playerId, itemId);
+        return ResponseEntity.noContent().build();
+    }
 }
