@@ -19,5 +19,9 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     Optional<Item> findBySlotTypeAndPlayerId(final SlotType slotType, final long playerId);
 
+    Optional<Item> findBySlotTypeAndPlayerIdAndItemType(final SlotType slotType, final long playerId, final ItemType itemType);
+
+    @Query("SELECT i FROM Item i WHERE i.player.id = :playerId AND i.slotType IN :slotTypes")
+    List<Item> findItemsFromBag(@Param("playerId") final long playerId, @Param("slotTypes") final List<SlotType> slotTypes);
 }
 

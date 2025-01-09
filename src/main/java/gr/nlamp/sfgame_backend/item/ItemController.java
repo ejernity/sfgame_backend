@@ -19,4 +19,18 @@ public class ItemController {
         itemService.moveBagItem(playerId, dto);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("{playerId}/equip/{itemId}")
+    public ResponseEntity<Void> equip(@PathVariable("playerId") final long playerId,
+                                      @PathVariable("itemId") final long itemId) {
+        itemService.equip(playerId, itemId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("{playerId}/unequip/{itemId}")
+    public ResponseEntity<Void> unequip(@PathVariable("playerId") final long playerId,
+                                      @PathVariable("itemId") final long itemId) {
+        itemService.unequip(playerId, itemId);
+        return ResponseEntity.noContent().build();
+    }
 }
