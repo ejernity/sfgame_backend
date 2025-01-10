@@ -122,6 +122,7 @@ public class ItemGenerator {
         // TODO Set the itemId from the asset library of all game items!
         item.setItemId(123);
 
+        // TODO Use strategy design pattern to handle item type of potions and others...
         setRarity(item);
         setSkillValues(item, player);
         setArmorValue(item, player);

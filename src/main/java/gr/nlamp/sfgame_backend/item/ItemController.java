@@ -47,4 +47,11 @@ public class ItemController {
         itemService.sell(playerId, itemId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("{playerId}/consume-potion/{itemId}")
+    public ResponseEntity<Void> consumePotion(@PathVariable("playerId") final long playerId,
+                                     @PathVariable("itemId") final long boosterId) {
+        itemService.consumePotion(playerId, boosterId);
+        return ResponseEntity.noContent().build();
+    }
 }

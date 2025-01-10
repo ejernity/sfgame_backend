@@ -1,12 +1,15 @@
 package gr.nlamp.sfgame_backend.item;
 
 import gr.nlamp.sfgame_backend.item.dto.MoveItemRequestDto;
+import gr.nlamp.sfgame_backend.player.Booster;
+import gr.nlamp.sfgame_backend.player.BoosterRepository;
 import gr.nlamp.sfgame_backend.player.Player;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,12 +18,14 @@ import java.util.Optional;
 public class ItemService {
 
     private final ItemRepository itemRepository;
+    private final BoosterRepository boosterRepository;
 
     private final ItemGenerator itemGenerator;
 
     private static final String SLOT_GROUP_BAG = "BAG";
     private static final String SLOT_GROUP_SHOP = "SHOP";
     private static final BigInteger SELLING_PERCENTAGE = BigInteger.TWO;
+    private static final int MAX_ACTIVE_BOOSTERS = 3;
 
     private static final List<SlotType> bagSlots = List.of(SlotType.BAG_1, SlotType.BAG_2, SlotType.BAG_3,
             SlotType.BAG_4, SlotType.BAG_5, SlotType.BAG_6, SlotType.BAG_7, SlotType.BAG_8, SlotType.BAG_9,
@@ -114,6 +119,45 @@ public class ItemService {
         itemRepository.deleteItemById(item.getId());
     }
 
+    public void consumePotion(final long playerId, final long boosterId) {
+        final Booster booster = getBoosterIfExists(boosterId);
+        validateItemBelongsToPlayer(booster, playerId);
+        validateSlotTypeBelongsToGroupOfItems(booster.getSlotType(), SLOT_GROUP_BAG);
+
+        final Player player = booster.getPlayer();
+        clearInactiveBoosters(player);
+
+        validateMaxActiveBoostersForPlayer(player);
+
+        final Optional<Booster> optionalExistingBooster = player.getBoosters()
+                .stream().filter(b -> b.getPotionType().name().split("_")[0].equals(booster.getPotionType().name().split("_")[0]))
+                .findFirst();
+        final boolean existingBoosterWithSamePotionTypeCategory = optionalExistingBooster.isPresent();
+        if (existingBoosterWithSamePotionTypeCategory) {
+            final Booster existingBooster = optionalExistingBooster.get();
+            if (existingBooster.getPotionType().getPercentage() == booster.getPotionType().getPercentage()) {
+                existingBooster.setActiveUntil(existingBooster.getActiveUntil() + booster.getPotionType().getDays() * 86400000);
+                boosterRepository.delete(booster);
+                boosterRepository.save(existingBooster);
+            } else if (existingBooster.getPotionType().getPercentage() < booster.getPotionType().getPercentage()) {
+                boosterRepository.delete(existingBooster);
+                booster.setSlotType(SlotType.EQUIPMENT);
+                booster.setActiveUntil(System.currentTimeMillis() + booster.getPotionType().getDays() * 86400000);
+                boosterRepository.save(booster);
+            }
+        } else {
+            booster.setSlotType(SlotType.EQUIPMENT);
+            booster.setActiveUntil(System.currentTimeMillis() + booster.getPotionType().getDays() * 86400000);
+            boosterRepository.save(booster);
+        }
+    }
+
+    private void validateMaxActiveBoostersForPlayer(final Player player) {
+        final int activeBoosters = boosterRepository.countActiveBoostersForPlayer(player.getId());
+        if (activeBoosters == MAX_ACTIVE_BOOSTERS)
+            throw new RuntimeException("You have reached the maximum number of active boosters.");
+    }
+
     private void validatePlayerHasEnoughResourcesToBuyItem(final Player player, final Item item) {
         if (player.getCoins().compareTo(item.getCoinCost()) < 0 || player.getMushrooms().compareTo(item.getMushCost()) < 0)
             throw new RuntimeException("You do not have enough resources to buy it.");
@@ -165,7 +209,30 @@ public class ItemService {
         return optionalItem.get();
     }
 
+    private Booster getBoosterIfExists(final long boosterId) {
+        final Optional<Booster> optionalBooster = boosterRepository.findById(boosterId);
+        if (optionalBooster.isEmpty())
+            throw new RuntimeException("Booster did not exist.");
+
+        return optionalBooster.get();
+    }
+
     private List<Item> getItemsFromBag(final long playerId) {
         return itemRepository.findItemsInSlotTypes(playerId, bagSlots);
+    }
+
+    public void clearInactiveBoosters(final Player player) {
+        final List<Booster> boosters = player.getBoosters()
+                .stream()
+                .filter(booster -> booster.getSlotType().equals(SlotType.EQUIPMENT)).toList();
+        final List<Long> boosterIdsToDelete = new ArrayList<>();
+        for (final Booster booster : boosters) {
+            if (booster.getActiveUntil() < System.currentTimeMillis()) {
+                booster.setPlayer(null);
+                player.getBoosters().remove(booster);
+                boosterIdsToDelete.add(booster.getId());
+            }
+        }
+        boosterRepository.deleteAllById(boosterIdsToDelete);
     }
 }

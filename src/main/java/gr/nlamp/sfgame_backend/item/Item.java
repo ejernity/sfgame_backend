@@ -11,6 +11,7 @@ import java.math.BigInteger;
 
 @Entity
 @Table(name = "items")
+@Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 public class Item implements Serializable {
