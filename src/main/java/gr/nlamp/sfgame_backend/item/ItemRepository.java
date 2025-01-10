@@ -23,5 +23,9 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     @Query("SELECT i FROM Item i WHERE i.player.id = :playerId AND i.slotType IN :slotTypes")
     List<Item> findItemsInSlotTypes(@Param("playerId") final long playerId, @Param("slotTypes") final List<SlotType> slotTypes);
+
+    @Modifying
+    @Query("DELETE FROM Item i WHERE i.id = :itemId")
+    void deleteItemById(@Param("itemId") final long itemId);
 }
 

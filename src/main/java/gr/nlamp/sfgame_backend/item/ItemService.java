@@ -2,10 +2,11 @@ package gr.nlamp.sfgame_backend.item;
 
 import gr.nlamp.sfgame_backend.item.dto.MoveItemRequestDto;
 import gr.nlamp.sfgame_backend.player.Player;
-import gr.nlamp.sfgame_backend.player.PlayerRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,18 +15,17 @@ import java.util.Optional;
 public class ItemService {
 
     private final ItemRepository itemRepository;
+
     private final ItemGenerator itemGenerator;
 
     private static final String SLOT_GROUP_BAG = "BAG";
     private static final String SLOT_GROUP_SHOP = "SHOP";
+    private static final BigInteger SELLING_PERCENTAGE = BigInteger.TWO;
 
     private static final List<SlotType> bagSlots = List.of(SlotType.BAG_1, SlotType.BAG_2, SlotType.BAG_3,
             SlotType.BAG_4, SlotType.BAG_5, SlotType.BAG_6, SlotType.BAG_7, SlotType.BAG_8, SlotType.BAG_9,
             SlotType.BAG_10, SlotType.BAG_11, SlotType.BAG_12, SlotType.BAG_13, SlotType.BAG_14, SlotType.BAG_15,
             SlotType.BAG_16);
-
-    private static final int BAG_SPACE = 16;
-    private final PlayerRepository playerRepository;
 
     // TODO: Future feature allow movement between equipped items and items in bag
     public void moveBagItem(final long playerId, final MoveItemRequestDto dto) {
@@ -101,8 +101,17 @@ public class ItemService {
         itemRepository.save(item);
     }
 
+    @Transactional(rollbackOn = Exception.class)
     public void sell(final long playerId, final long itemId) {
+        final Item item = getItemIfExists(itemId);
+        validateItemBelongsToPlayer(item, playerId);
+        validateSlotTypeBelongsToGroupOfItems(item.getSlotType(), List.of(SlotType.EQUIPMENT.name(), SLOT_GROUP_BAG));
 
+        // Kanei stroggylopoiisi pros ta katw
+        final BigInteger sellingPrice = item.getCoinCost().divide(SELLING_PERCENTAGE);
+        final Player player = item.getPlayer();
+        player.setCoins(player.getCoins().add(sellingPrice));
+        itemRepository.deleteItemById(item.getId());
     }
 
     private void validatePlayerHasEnoughResourcesToBuyItem(final Player player, final Item item) {
@@ -128,6 +137,14 @@ public class ItemService {
     private void validateSlotTypeBelongsToGroupOfItems(final SlotType slotType, final String slotGroup) {
         if (!slotType.name().contains(slotGroup))
             throw new RuntimeException(String.format("Slot type did not belong to the %s.", slotGroup));
+    }
+
+    private void validateSlotTypeBelongsToGroupOfItems(final SlotType slotType, final List<String> slotGroupList) {
+        final boolean belongsToGroup = slotGroupList.stream()
+                .anyMatch(slotGroup -> slotType.name().contains(slotGroup));
+
+        if (!belongsToGroup)
+            throw new RuntimeException(String.format("Slot type did not belong to any of the specified groups: %s.", slotGroupList));
     }
 
     private Item getItemFromDestinationSlot(final long playerId, final SlotType slotType) {
