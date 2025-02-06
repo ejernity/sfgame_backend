@@ -1,8 +1,8 @@
 package gr.nlamp.sfgame_backend.item;
 
+import gr.nlamp.sfgame_backend.item.booster.Booster;
 import gr.nlamp.sfgame_backend.item.dto.MoveItemRequestDto;
-import gr.nlamp.sfgame_backend.player.Booster;
-import gr.nlamp.sfgame_backend.player.BoosterRepository;
+import gr.nlamp.sfgame_backend.item.booster.BoosterRepository;
 import gr.nlamp.sfgame_backend.player.Player;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class ItemService {
 
     private static final String SLOT_GROUP_BAG = "BAG";
     private static final String SLOT_GROUP_SHOP = "SHOP";
-    private static final BigInteger SELLING_PERCENTAGE = BigInteger.TWO;
+    private static final BigInteger SELLING_PERCENTAGE = BigInteger.valueOf(4);
     private static final int MAX_ACTIVE_BOOSTERS = 3;
 
     private static final List<SlotType> bagSlots = List.of(SlotType.BAG_1, SlotType.BAG_2, SlotType.BAG_3,
@@ -113,7 +113,7 @@ public class ItemService {
         validateSlotTypeBelongsToGroupOfItems(item.getSlotType(), List.of(SlotType.EQUIPMENT.name(), SLOT_GROUP_BAG));
 
         // Kanei stroggylopoiisi pros ta katw
-        final BigInteger sellingPrice = item.getCoinCost().divide(SELLING_PERCENTAGE);
+        final BigInteger sellingPrice = item.getCoinCost().divide(SELLING_PERCENTAGE); // 25% of the buying price
         final Player player = item.getPlayer();
         player.setCoins(player.getCoins().add(sellingPrice));
         itemRepository.deleteItemById(item.getId());

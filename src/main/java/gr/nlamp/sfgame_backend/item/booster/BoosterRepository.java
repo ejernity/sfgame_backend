@@ -1,4 +1,4 @@
-package gr.nlamp.sfgame_backend.player;
+package gr.nlamp.sfgame_backend.item.booster;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

@@ -1,4 +1,4 @@
-package gr.nlamp.sfgame_backend.player;
+package gr.nlamp.sfgame_backend.item.booster;
 
 import gr.nlamp.sfgame_backend.item.Item;
 import gr.nlamp.sfgame_backend.item.PotionType;

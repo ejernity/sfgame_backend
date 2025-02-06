@@ -1,5 +1,7 @@
 package gr.nlamp.sfgame_backend.item;
 
+import java.util.List;
+
 public enum SlotType {
     EQUIPMENT,
     BAG_1,
@@ -30,5 +32,17 @@ public enum SlotType {
     MAGIC_SHOP_4,
     MAGIC_SHOP_5,
     MAGIC_SHOP_6,
-    QUEST
+    QUEST;
+
+    public static final List<SlotType> magicShopSlots = List.of(
+            SlotType.MAGIC_SHOP_1, SlotType.MAGIC_SHOP_2,
+            SlotType.MAGIC_SHOP_3, SlotType.MAGIC_SHOP_4,
+            SlotType.MAGIC_SHOP_5, SlotType.MAGIC_SHOP_6
+    );
+
+    public static final List<SlotType> weaponShopSlots = List.of(
+            SlotType.WEAPON_SHOP_1, SlotType.WEAPON_SHOP_2,
+            SlotType.WEAPON_SHOP_3, SlotType.WEAPON_SHOP_4,
+            SlotType.WEAPON_SHOP_5, SlotType.WEAPON_SHOP_6
+    );
 }
