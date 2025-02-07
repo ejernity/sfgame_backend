@@ -28,7 +28,7 @@ public class GuildService {
 
         final Guild guild = createGuild(dto);
         createGuildMemberForPlayerAsLeader(playerId, guild, player);
-        
+
         player.setCoins(player.getCoins().subtract(COINS_TO_CREATE_GUILD));
     }
 

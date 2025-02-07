@@ -10,7 +10,9 @@ import java.io.Serializable;
 import java.math.BigInteger;
 
 @Entity
-@Table(name = "guild_members")
+@Table(name = "guild_members", uniqueConstraints = {
+        @UniqueConstraint(name = "UC_player", columnNames = {"player_id"})
+})
 @Getter
 @Setter
 public class GuildMember implements Serializable {
@@ -20,11 +22,13 @@ public class GuildMember implements Serializable {
     @ManyToOne(cascade = {CascadeType.PERSIST})
     @JsonIgnore
     @MapsId("guildId")
+    @JoinColumn(name = "guild_id")
     private Guild guild;
 
     @ManyToOne(cascade = {CascadeType.PERSIST})
     @JsonIgnore
     @MapsId("playerId")
+    @JoinColumn(name = "player_id")
     private Player player;
 
     @Column(columnDefinition = "ENUM('LEADER','OFFICER','MEMBER')")
