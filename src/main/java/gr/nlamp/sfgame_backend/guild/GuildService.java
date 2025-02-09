@@ -1,6 +1,7 @@
 package gr.nlamp.sfgame_backend.guild;
 
 import gr.nlamp.sfgame_backend.guild.dto.CreateGuildDto;
+import gr.nlamp.sfgame_backend.guild.dto.GuildInvitationDto;
 import gr.nlamp.sfgame_backend.player.Player;
 import gr.nlamp.sfgame_backend.player.PlayerRepository;
 import jakarta.transaction.Transactional;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +18,8 @@ public class GuildService {
 
     private final GuildRepository guildRepository;
     private final PlayerRepository playerRepository;
+    private final GuildInvitationRepository guildInvitationRepository;
+    private final GuildMemberRepository guildMemberRepository;
 
     private static final BigInteger COINS_TO_CREATE_GUILD = BigInteger.valueOf(10);
 
@@ -56,6 +60,59 @@ public class GuildService {
         member.setPlayerRank(Rank.LEADER);
         member.setSilverDonated(BigInteger.ZERO);
         member.setMushroomDonated(BigInteger.ZERO);
+    }
+
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
+    public void invite(final GuildInvitationDto dto, final long playerId) {
+        final Player playerToInvite = validateDestinationPlayerExistsAndIsNotTheSameAsAuthentication(playerId, dto);
+        final Player player = getPlayer(playerId);
+        final GuildMember guildMember = getGuildMember(player);
+        validatePlayerRankCanSendInvitation(guildMember);
+
+        final Guild guild = guildMember.getGuild();
+        validateGuildHasEnoughSpaceToInvitePlayer(guild);
+        validateNoExistingGuildInvitationForPlayerAndGuildAndStatusOnHold(playerToInvite, guild);
+
+        final GuildInvitation guildInvitation = new GuildInvitation();
+        guildInvitation.setGuild(guild);
+        guildInvitation.setPlayer(playerToInvite);
+        guildInvitation.setStatus(GuildInvitationStatus.ON_HOLD);
+        guildInvitationRepository.save(guildInvitation);
+        // TODO Create system message to the playerToInvite for the invitation
+    }
+
+    private void validateGuildHasEnoughSpaceToInvitePlayer(Guild guild) {
+        if (guildMemberRepository.countGuildMembersByGuildId(guild.getId()) >= GuildConstants.MAX_MEMBERS) {
+            throw new RuntimeException("You have reached the maximum number of members in this guild.");
+        }
+    }
+
+    private void validateNoExistingGuildInvitationForPlayerAndGuildAndStatusOnHold(Player playerToInvite, Guild guild) {
+        final Optional<GuildInvitation> optionalGuildInvitation = guildInvitationRepository.findByPlayerIdAndGuildIdAndStatus(playerToInvite.getId(), guild.getId(), GuildInvitationStatus.ON_HOLD);
+        if (optionalGuildInvitation.isPresent()) {
+            throw new RuntimeException("There is already an invitation with status on hold for the player and the guild.");
+        }
+    }
+
+    private Player validateDestinationPlayerExistsAndIsNotTheSameAsAuthentication(long playerId, GuildInvitationDto dto) {
+        if (dto.getPlayerId() == playerId) {
+            throw new RuntimeException("You cannot invite yourself");
+        }
+        return getPlayer(dto.getPlayerId());
+    }
+
+    private static void validatePlayerRankCanSendInvitation(GuildMember guildMember) {
+        if (!Rank.CAN_SEND_INVITATION.contains(guildMember.getPlayerRank())) {
+            throw new RuntimeException("Can't send invitation.");
+        }
+    }
+
+    private GuildMember getGuildMember(Player player) {
+        final Set<GuildMember> guildMemberSet = player.getGuildMembers();
+        if (guildMemberSet.isEmpty()) {
+            throw new RuntimeException("Player do not belong to a guild.");
+        }
+        return guildMemberSet.iterator().next();
     }
 
     private void validatePlayerDoNotBelongToAGuild(Player player) {

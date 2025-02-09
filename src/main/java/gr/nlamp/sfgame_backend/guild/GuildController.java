@@ -1,6 +1,7 @@
 package gr.nlamp.sfgame_backend.guild;
 
 import gr.nlamp.sfgame_backend.guild.dto.CreateGuildDto;
+import gr.nlamp.sfgame_backend.guild.dto.GuildInvitationDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,13 @@ public class GuildController {
     public ResponseEntity<Void> create(@PathVariable("playerId") long playerId,
                                     @RequestBody @Valid CreateGuildDto dto) {
         guildService.create(dto, playerId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("invite/{playerId}")
+    public ResponseEntity<Void> invite(@PathVariable("playerId") long playerId,
+                                       @RequestBody @Valid GuildInvitationDto dto) {
+        guildService.invite(dto, playerId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
     

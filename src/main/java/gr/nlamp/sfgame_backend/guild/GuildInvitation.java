@@ -19,12 +19,12 @@ public class GuildInvitation implements Serializable {
 
     @ManyToOne(cascade = {CascadeType.PERSIST})
     @JsonIgnore
-    @MapsId("guildId")
+    @JoinColumn(name = "guild_id")
     private Guild guild;
 
     @ManyToOne(cascade = {CascadeType.PERSIST})
     @JsonIgnore
-    @MapsId("playerId")
+    @JoinColumn(name = "player_id")
     private Player player;
 
     @Column(columnDefinition = "ENUM('ON_HOLD','ACCEPTED','REJECTED'")
