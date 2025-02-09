@@ -2,6 +2,7 @@ package gr.nlamp.sfgame_backend.guild;
 
 import gr.nlamp.sfgame_backend.guild.dto.CreateGuildDto;
 import gr.nlamp.sfgame_backend.guild.dto.GuildInvitationDto;
+import gr.nlamp.sfgame_backend.guild.dto.ProcessGuildInvitationDto;
 import gr.nlamp.sfgame_backend.player.Player;
 import gr.nlamp.sfgame_backend.player.PlayerRepository;
 import jakarta.transaction.Transactional;
@@ -31,7 +32,7 @@ public class GuildService {
         validateGuildNameIsNotReserved(dto.getName());
 
         final Guild guild = createGuild(dto);
-        createGuildMemberForPlayerAsLeader(playerId, guild, player);
+        createGuildMemberForPlayer(guild, player, Rank.LEADER);
 
         player.setCoins(player.getCoins().subtract(COINS_TO_CREATE_GUILD));
     }
@@ -47,9 +48,9 @@ public class GuildService {
     }
 
     @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRED)
-    protected void createGuildMemberForPlayerAsLeader(long playerId, Guild guild, Player player) {
+    protected void createGuildMemberForPlayer(Guild guild, Player player, Rank rank) {
         final GuildMemberPK pk = new GuildMemberPK();
-        pk.setPlayerId(playerId);
+        pk.setPlayerId(player.getId());
         pk.setGuildId(guild.getId());
         final GuildMember member = new GuildMember();
         member.setGuild(guild);
@@ -57,7 +58,7 @@ public class GuildService {
         member.setGuildMemberPK(pk);
         member.setPlayer(player);
         player.getGuildMembers().add(member);
-        member.setPlayerRank(Rank.LEADER);
+        member.setPlayerRank(rank);
         member.setSilverDonated(BigInteger.ZERO);
         member.setMushroomDonated(BigInteger.ZERO);
     }
@@ -79,6 +80,26 @@ public class GuildService {
         guildInvitation.setStatus(GuildInvitationStatus.ON_HOLD);
         guildInvitationRepository.save(guildInvitation);
         // TODO Create system message to the playerToInvite for the invitation
+    }
+
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
+    public void acceptInvitation(final ProcessGuildInvitationDto dto, final long playerId) {
+        final Player player = getPlayer(playerId);
+        validatePlayerDoNotBelongToAGuild(player);
+
+        final GuildInvitation invitation = getInvitationIfExists(dto, playerId);
+        invitation.setStatus(GuildInvitationStatus.ACCEPTED);
+
+        createGuildMemberForPlayer(invitation.getGuild(), player, Rank.MEMBER);
+    }
+
+    private GuildInvitation getInvitationIfExists(ProcessGuildInvitationDto dto, long playerId) {
+        final Optional<GuildInvitation> optionalGuildInvitation =
+                guildInvitationRepository.findByPlayerIdAndGuildIdAndStatus(playerId, dto.getGuildId(), GuildInvitationStatus.ON_HOLD);
+        if (optionalGuildInvitation.isEmpty()) {
+            throw new RuntimeException("There is no such an invitation to process.");
+        }
+        return optionalGuildInvitation.get();
     }
 
     private void validateGuildHasEnoughSpaceToInvitePlayer(Guild guild) {

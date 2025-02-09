@@ -2,6 +2,7 @@ package gr.nlamp.sfgame_backend.guild;
 
 import gr.nlamp.sfgame_backend.guild.dto.CreateGuildDto;
 import gr.nlamp.sfgame_backend.guild.dto.GuildInvitationDto;
+import gr.nlamp.sfgame_backend.guild.dto.ProcessGuildInvitationDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,5 +30,11 @@ public class GuildController {
         guildService.invite(dto, playerId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-    
+
+    @PutMapping("invite/accept/{playerId}")
+    public ResponseEntity<Void> acceptInvitation(@PathVariable("playerId") long playerId,
+                                                 @RequestBody @Valid ProcessGuildInvitationDto dto) {
+        guildService.acceptInvitation(dto, playerId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
