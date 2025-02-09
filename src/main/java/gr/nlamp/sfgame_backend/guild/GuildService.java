@@ -93,6 +93,12 @@ public class GuildService {
         createGuildMemberForPlayer(invitation.getGuild(), player, Rank.MEMBER);
     }
 
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
+    public void rejectInvitation(final ProcessGuildInvitationDto dto, final long playerId) {
+        final GuildInvitation invitation = getInvitationIfExists(dto, playerId);
+        invitation.setStatus(GuildInvitationStatus.REJECTED);
+    }
+
     private GuildInvitation getInvitationIfExists(ProcessGuildInvitationDto dto, long playerId) {
         final Optional<GuildInvitation> optionalGuildInvitation =
                 guildInvitationRepository.findByPlayerIdAndGuildIdAndStatus(playerId, dto.getGuildId(), GuildInvitationStatus.ON_HOLD);

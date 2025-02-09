@@ -37,4 +37,11 @@ public class GuildController {
         guildService.acceptInvitation(dto, playerId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @PutMapping("invite/reject/{playerId}")
+    public ResponseEntity<Void> rejectInvitation(@PathVariable("playerId") long playerId,
+                                                 @RequestBody @Valid ProcessGuildInvitationDto dto) {
+        guildService.rejectInvitation(dto, playerId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
