@@ -65,14 +65,15 @@ public class GuildService {
 
     @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
     public void invite(final GuildInvitationDto dto, final long playerId) {
-        final Player playerToInvite = validateDestinationPlayerExistsAndIsNotTheSameAsAuthentication(playerId, dto);
+        final Player playerToInvite = getPlayer(dto.getPlayerId());
         final Player player = getPlayer(playerId);
         final GuildMember guildMember = getGuildMember(player);
         validatePlayerRankCanSendInvitation(guildMember);
 
         final Guild guild = guildMember.getGuild();
-        validateGuildHasEnoughSpaceToInvitePlayer(guild);
+        validatePlayerToInviteIsNotAnExistingGuildMember(guild, playerToInvite);
         validateNoExistingGuildInvitationForPlayerAndGuildAndStatusOnHold(playerToInvite, guild);
+        validateGuildHasEnoughSpaceToInvitePlayer(guild);
 
         final GuildInvitation guildInvitation = new GuildInvitation();
         guildInvitation.setGuild(guild);
@@ -99,6 +100,16 @@ public class GuildService {
         invitation.setStatus(GuildInvitationStatus.REJECTED);
     }
 
+    private void validatePlayerToInviteIsNotAnExistingGuildMember(Guild guild, Player playerToInvite) {
+        final GuildMemberPK pk = new GuildMemberPK();
+        pk.setPlayerId(playerToInvite.getId());
+        pk.setGuildId(guild.getId());
+        final Optional<GuildMember> optionalGuildMember = guildMemberRepository.findById(pk);
+        if (optionalGuildMember.isPresent()) {
+            throw new RuntimeException("You cannot invite an existing member of your guild");
+        }
+    }
+
     private GuildInvitation getInvitationIfExists(ProcessGuildInvitationDto dto, long playerId) {
         final Optional<GuildInvitation> optionalGuildInvitation =
                 guildInvitationRepository.findByPlayerIdAndGuildIdAndStatus(playerId, dto.getGuildId(), GuildInvitationStatus.ON_HOLD);
@@ -119,13 +130,6 @@ public class GuildService {
         if (optionalGuildInvitation.isPresent()) {
             throw new RuntimeException("There is already an invitation with status on hold for the player and the guild.");
         }
-    }
-
-    private Player validateDestinationPlayerExistsAndIsNotTheSameAsAuthentication(long playerId, GuildInvitationDto dto) {
-        if (dto.getPlayerId() == playerId) {
-            throw new RuntimeException("You cannot invite yourself");
-        }
-        return getPlayer(dto.getPlayerId());
     }
 
     private static void validatePlayerRankCanSendInvitation(GuildMember guildMember) {
