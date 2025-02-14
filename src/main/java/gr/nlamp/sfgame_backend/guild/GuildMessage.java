@@ -26,4 +26,9 @@ public class GuildMessage implements Serializable {
 
     @Column(columnDefinition = "TEXT")
     private String message;
+
+    @PrePersist
+    private void prePersist() {
+        timeStamp = System.currentTimeMillis();
+    }
 }

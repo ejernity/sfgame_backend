@@ -1,13 +1,12 @@
 package gr.nlamp.sfgame_backend.guild;
 
-import gr.nlamp.sfgame_backend.guild.dto.CreateGuildDto;
-import gr.nlamp.sfgame_backend.guild.dto.GuildInvitationDto;
-import gr.nlamp.sfgame_backend.guild.dto.ProcessGuildInvitationDto;
-import gr.nlamp.sfgame_backend.guild.dto.TreasureInstructorUpgradeCostsDto;
+import gr.nlamp.sfgame_backend.guild.dto.*;
 import gr.nlamp.sfgame_backend.player.Player;
 import gr.nlamp.sfgame_backend.player.PlayerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -25,6 +24,9 @@ public class GuildService {
 
     private static final BigInteger COINS_TO_CREATE_GUILD = BigInteger.valueOf(10);
     private static final int MAX_TREASURE_INSTRUCTOR_LEVEL = 25;
+
+    private final MessageSource messageSource;
+    private final GuildMessageRepository guildMessageRepository;
 
     @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
     public void create(final CreateGuildDto dto, final long playerId) {
@@ -117,6 +119,11 @@ public class GuildService {
         guild.setGold(guild.getGold().subtract(upgradeCostsDto.getGold()));
         guild.setMushrooms(guild.getMushrooms() - upgradeCostsDto.getMushrooms());
         guild.setTreasureLevel(guild.getTreasureLevel() + 1);
+
+        final GuildMessage guildMessage = new GuildMessage();
+        guildMessage.setGuild(guild);
+        guildMessage.setMessage(messageSource.getMessage("guild.upgrade.treasure", new String[]{player.getUsername(), guild.getTreasureLevel().toString()}, LocaleContextHolder.getLocale()));
+        guildMessageRepository.save(guildMessage);
     }
 
     @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
@@ -132,6 +139,62 @@ public class GuildService {
         guild.setGold(guild.getGold().subtract(upgradeCostsDto.getGold()));
         guild.setMushrooms(guild.getMushrooms() - upgradeCostsDto.getMushrooms());
         guild.setInstructorLevel(guild.getInstructorLevel() + 1);
+
+        final GuildMessage guildMessage = new GuildMessage();
+        guildMessage.setGuild(guild);
+        guildMessage.setMessage(messageSource.getMessage("guild.upgrade.instructor", new String[]{player.getUsername(), guild.getInstructorLevel().toString()}, LocaleContextHolder.getLocale()));
+        guildMessageRepository.save(guildMessage);
+    }
+
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
+    public void donateGold(final DonateQuantityDto dto, final long playerId) {
+        validateDonateQuantityDto(dto, DonationType.GOLD);
+        final Player player = getPlayer(playerId);
+        final GuildMember guildMember = getGuildMember(player);
+        validatePlayerHasEnoughResourcesToDonate(player, DonationType.GOLD, dto);
+        final Guild guild = guildMember.getGuild();
+
+        player.setCoins(player.getCoins().subtract(dto.getGold()));
+        guild.setGold(guild.getGold().add(dto.getGold()));
+
+        final GuildMessage guildMessage = new GuildMessage();
+        guildMessage.setGuild(guild);
+        guildMessage.setMessage(messageSource.getMessage("guild.donation.gold", new String[]{player.getUsername(), dto.getGold().toString()}, LocaleContextHolder.getLocale()));
+        guildMessageRepository.save(guildMessage);
+    }
+
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
+    public void donateMushrooms(final DonateQuantityDto dto, final long playerId) {
+        validateDonateQuantityDto(dto, DonationType.MUSHROOMS);
+        final Player player = getPlayer(playerId);
+        final GuildMember guildMember = getGuildMember(player);
+        validatePlayerHasEnoughResourcesToDonate(player, DonationType.MUSHROOMS, dto);
+        final Guild guild = guildMember.getGuild();
+
+        player.setMushrooms(player.getMushrooms() - dto.getMushrooms());
+        guild.setMushrooms(guild.getMushrooms() + dto.getMushrooms());
+
+        final GuildMessage guildMessage = new GuildMessage();
+        guildMessage.setGuild(guild);
+        guildMessage.setMessage(messageSource.getMessage("guild.donation.mushrooms", new String[]{player.getUsername(), String.valueOf(dto.getMushrooms())}, LocaleContextHolder.getLocale()));
+        guildMessageRepository.save(guildMessage);
+    }
+
+    private void validateDonateQuantityDto(DonateQuantityDto dto, DonationType donationType) {
+        if (donationType == DonationType.GOLD && (dto.getGold() == null || dto.getGold().compareTo(BigInteger.ZERO) <= 0))
+            throw new RuntimeException("Gold to be donated has to be greater than 0");
+        if (donationType == DonationType.MUSHROOMS && dto.getMushrooms() <= 0)
+            throw new RuntimeException("Mushrooms to be donated has to be greater than 0");
+    }
+
+    private void validatePlayerHasEnoughResourcesToDonate(Player player, DonationType donationType, DonateQuantityDto dto) {
+        if (donationType == DonationType.GOLD) {
+            if (player.getCoins().compareTo(dto.getGold()) < 0)
+                throw new RuntimeException("You do not have enough coins to donate.");
+        } else {
+            if (player.getMushrooms() < dto.getMushrooms())
+                throw new RuntimeException("You do not have enough mushrooms to donate.");
+        }
     }
 
     private void validateMaxLevelNotYetReached(Guild guild, UpgradeType upgradeType) {

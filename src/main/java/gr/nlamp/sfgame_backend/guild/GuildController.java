@@ -1,6 +1,7 @@
 package gr.nlamp.sfgame_backend.guild;
 
 import gr.nlamp.sfgame_backend.guild.dto.CreateGuildDto;
+import gr.nlamp.sfgame_backend.guild.dto.DonateQuantityDto;
 import gr.nlamp.sfgame_backend.guild.dto.GuildInvitationDto;
 import gr.nlamp.sfgame_backend.guild.dto.ProcessGuildInvitationDto;
 import jakarta.validation.Valid;
@@ -54,6 +55,20 @@ public class GuildController {
     @GetMapping("upgrade/instructor/{playerId}")
     public ResponseEntity<Void> upgradeInstructor(@PathVariable("playerId") long playerId) {
         guildService.upgradeInstructor(playerId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("donate/gold/{playerId}")
+    public ResponseEntity<Void> donateGold(@PathVariable("playerId") long playerId,
+                                           @RequestBody DonateQuantityDto dto) {
+        guildService.donateGold(dto, playerId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("donate/mushrooms/{playerId}")
+    public ResponseEntity<Void> donateMushrooms(@PathVariable("playerId") long playerId,
+                                                @RequestBody DonateQuantityDto dto) {
+        guildService.donateMushrooms(dto, playerId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
