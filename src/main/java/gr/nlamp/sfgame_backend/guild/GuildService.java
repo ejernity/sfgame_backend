@@ -3,6 +3,7 @@ package gr.nlamp.sfgame_backend.guild;
 import gr.nlamp.sfgame_backend.guild.dto.CreateGuildDto;
 import gr.nlamp.sfgame_backend.guild.dto.GuildInvitationDto;
 import gr.nlamp.sfgame_backend.guild.dto.ProcessGuildInvitationDto;
+import gr.nlamp.sfgame_backend.guild.dto.TreasureInstructorUpgradeCostsDto;
 import gr.nlamp.sfgame_backend.player.Player;
 import gr.nlamp.sfgame_backend.player.PlayerRepository;
 import jakarta.transaction.Transactional;
@@ -23,6 +24,7 @@ public class GuildService {
     private final GuildMemberRepository guildMemberRepository;
 
     private static final BigInteger COINS_TO_CREATE_GUILD = BigInteger.valueOf(10);
+    private static final int MAX_TREASURE_INSTRUCTOR_LEVEL = 25;
 
     @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
     public void create(final CreateGuildDto dto, final long playerId) {
@@ -42,6 +44,8 @@ public class GuildService {
         final Guild guild = new Guild();
         guild.setName(dto.getName());
         guild.setHonor(BigInteger.ZERO);
+        guild.setGold(BigInteger.ZERO);
+        guild.setMushrooms(0L);
         guild.setInstructorLevel(0);
         guild.setTreasureLevel(0);
         return guildRepository.save(guild);
@@ -59,8 +63,8 @@ public class GuildService {
         member.setPlayer(player);
         player.getGuildMembers().add(member);
         member.setPlayerRank(rank);
-        member.setSilverDonated(BigInteger.ZERO);
-        member.setMushroomDonated(BigInteger.ZERO);
+        member.setGoldDonated(BigInteger.ZERO);
+        member.setMushroomDonated(0L);
     }
 
     @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
@@ -100,6 +104,62 @@ public class GuildService {
         invitation.setStatus(GuildInvitationStatus.REJECTED);
     }
 
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
+    public void upgradeTreasure(final long playerId) {
+        final Player player = getPlayer(playerId);
+        final GuildMember guildMember = getGuildMember(player);
+        validatePlayerRankCanUpgradeTreasureAndInstructor(guildMember);
+
+        final Guild guild = guildMember.getGuild();
+        validateMaxLevelNotYetReached(guild, UpgradeType.TREASURE);
+        final TreasureInstructorUpgradeCostsDto upgradeCostsDto = validateGuildHasEnoughResourcesToDoUpgrade(guild, UpgradeType.TREASURE);
+
+        guild.setGold(guild.getGold().subtract(upgradeCostsDto.getGold()));
+        guild.setMushrooms(guild.getMushrooms() - upgradeCostsDto.getMushrooms());
+        guild.setTreasureLevel(guild.getTreasureLevel() + 1);
+    }
+
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
+    public void upgradeInstructor(long playerId) {
+        final Player player = getPlayer(playerId);
+        final GuildMember guildMember = getGuildMember(player);
+        validatePlayerRankCanUpgradeTreasureAndInstructor(guildMember);
+
+        final Guild guild = guildMember.getGuild();
+        validateMaxLevelNotYetReached(guild, UpgradeType.INSTRUCTOR);
+        final TreasureInstructorUpgradeCostsDto upgradeCostsDto = validateGuildHasEnoughResourcesToDoUpgrade(guild, UpgradeType.INSTRUCTOR);
+
+        guild.setGold(guild.getGold().subtract(upgradeCostsDto.getGold()));
+        guild.setMushrooms(guild.getMushrooms() - upgradeCostsDto.getMushrooms());
+        guild.setInstructorLevel(guild.getInstructorLevel() + 1);
+    }
+
+    private void validateMaxLevelNotYetReached(Guild guild, UpgradeType upgradeType) {
+        Integer level;
+        if (upgradeType == UpgradeType.TREASURE)
+            level = guild.getTreasureLevel();
+        else
+            level = guild.getInstructorLevel();
+
+        if (level >= MAX_TREASURE_INSTRUCTOR_LEVEL)
+            throw new RuntimeException("Already reached the maximum level for " + upgradeType);
+    }
+
+    private TreasureInstructorUpgradeCostsDto validateGuildHasEnoughResourcesToDoUpgrade(Guild guild, final UpgradeType upgradeType) {
+        Integer level;
+        if (upgradeType == UpgradeType.TREASURE)
+            level = guild.getTreasureLevel();
+        else
+            level = guild.getInstructorLevel();
+
+        final TreasureInstructorUpgradeCostsDto upgradeCostsDto = GuildConstants.getUpgradeCost(level + 1);
+        if (upgradeCostsDto.getGold().compareTo(guild.getGold()) > 0 ||
+            (upgradeCostsDto.getMushrooms() != 0 && upgradeCostsDto.getMushrooms() > guild.getMushrooms())) {
+            throw new RuntimeException("Not enough resources to do upgrade for " + upgradeType + " to level " + (level + 1));
+        }
+        return upgradeCostsDto;
+    }
+
     private void validatePlayerToInviteIsNotAnExistingGuildMember(Guild guild, Player playerToInvite) {
         final GuildMemberPK pk = new GuildMemberPK();
         pk.setPlayerId(playerToInvite.getId());
@@ -135,6 +195,12 @@ public class GuildService {
     private static void validatePlayerRankCanSendInvitation(GuildMember guildMember) {
         if (!Rank.CAN_SEND_INVITATION.contains(guildMember.getPlayerRank())) {
             throw new RuntimeException("Can't send invitation.");
+        }
+    }
+
+    private static void validatePlayerRankCanUpgradeTreasureAndInstructor(GuildMember guildMember) {
+        if (!Rank.CAN_UPGRADE_TREASURE_AND_INSTRUCTOR.contains(guildMember.getPlayerRank())) {
+            throw new RuntimeException("Can't upgrade treasure and instructor.");
         }
     }
 

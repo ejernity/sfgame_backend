@@ -27,6 +27,10 @@ public class Guild implements Serializable {
 
     private BigInteger honor;
 
+    private BigInteger gold;
+
+    private Long mushrooms;
+
     private Integer treasureLevel;
 
     private Integer instructorLevel;

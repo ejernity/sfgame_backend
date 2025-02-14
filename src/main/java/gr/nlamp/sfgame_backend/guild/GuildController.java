@@ -44,4 +44,16 @@ public class GuildController {
         guildService.rejectInvitation(dto, playerId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @GetMapping("upgrade/treasure/{playerId}")
+    public ResponseEntity<Void> upgradeTreasure(@PathVariable("playerId") long playerId) {
+        guildService.upgradeTreasure(playerId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("upgrade/instructor/{playerId}")
+    public ResponseEntity<Void> upgradeInstructor(@PathVariable("playerId") long playerId) {
+        guildService.upgradeInstructor(playerId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

@@ -35,8 +35,8 @@ public class GuildMember implements Serializable {
     @Enumerated(value = EnumType.STRING)
     private Rank playerRank;
 
-    private BigInteger silverDonated;
+    private BigInteger goldDonated;
 
-    private BigInteger mushroomDonated;
+    private Long mushroomDonated;
 
 }

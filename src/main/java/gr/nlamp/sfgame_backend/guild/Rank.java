@@ -8,4 +8,6 @@ public enum Rank {
     MEMBER;
 
     public static final List<Rank> CAN_SEND_INVITATION = List.of(LEADER, OFFICER);
+
+    public static final List<Rank> CAN_UPGRADE_TREASURE_AND_INSTRUCTOR = List.of(LEADER, OFFICER);
 }
