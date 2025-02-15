@@ -16,9 +16,9 @@ public class MountController {
     private final MountService mountService;
 
     @GetMapping("{playerId}/{mount}")
-    public ResponseEntity<?> buyMount(@PathVariable("playerId") final long playerId,
+    public ResponseEntity<Void> buyMount(@PathVariable("playerId") final long playerId,
                                       @PathVariable("mount") final Mount mount) {
         mountService.buyMount(playerId, mount);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

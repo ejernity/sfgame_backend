@@ -1,9 +1,6 @@
 package gr.nlamp.sfgame_backend.guild;
 
-import gr.nlamp.sfgame_backend.guild.dto.CreateGuildDto;
-import gr.nlamp.sfgame_backend.guild.dto.DonateQuantityDto;
-import gr.nlamp.sfgame_backend.guild.dto.GuildInvitationDto;
-import gr.nlamp.sfgame_backend.guild.dto.ProcessGuildInvitationDto;
+import gr.nlamp.sfgame_backend.guild.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -70,5 +67,10 @@ public class GuildController {
                                                 @RequestBody DonateQuantityDto dto) {
         guildService.donateMushrooms(dto, playerId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("messages/{playerId}")
+    public ResponseEntity<GuildMessagesDto> getMessages(@PathVariable("playerId") long playerId) {
+        return new ResponseEntity<>(guildService.getMessages(playerId), HttpStatus.OK);
     }
 }

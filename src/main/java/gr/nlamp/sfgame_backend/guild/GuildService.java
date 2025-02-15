@@ -21,12 +21,14 @@ public class GuildService {
     private final PlayerRepository playerRepository;
     private final GuildInvitationRepository guildInvitationRepository;
     private final GuildMemberRepository guildMemberRepository;
+    private final GuildMessageRepository guildMessageRepository;
+
+    private final GuildMessageMapper guildMessageMapper = GuildMessageMapper.INSTANCE;
 
     private static final BigInteger COINS_TO_CREATE_GUILD = BigInteger.valueOf(10);
     private static final int MAX_TREASURE_INSTRUCTOR_LEVEL = 25;
 
     private final MessageSource messageSource;
-    private final GuildMessageRepository guildMessageRepository;
 
     @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
     public void create(final CreateGuildDto dto, final long playerId) {
@@ -178,6 +180,15 @@ public class GuildService {
         guildMessage.setGuild(guild);
         guildMessage.setMessage(messageSource.getMessage("guild.donation.mushrooms", new String[]{player.getUsername(), String.valueOf(dto.getMushrooms())}, LocaleContextHolder.getLocale()));
         guildMessageRepository.save(guildMessage);
+    }
+
+    public GuildMessagesDto getMessages(final long playerId) {
+        final Guild guild = guildRepository.findGuildForPlayerId(playerId);
+        if (guild == null)
+            throw new RuntimeException("Player do not belong to a guild.");
+
+        final Set<GuildMessage> guildMessageSet = guildMessageRepository.findByGuildIdOrderByTimeStampAsc(guild.getId());
+        return new GuildMessagesDto(guildMessageMapper.mapSet(guildMessageSet));
     }
 
     private void validateDonateQuantityDto(DonateQuantityDto dto, DonationType donationType) {
