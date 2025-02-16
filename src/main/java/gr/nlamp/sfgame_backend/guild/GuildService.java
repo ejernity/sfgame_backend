@@ -205,6 +205,15 @@ public class GuildService {
         guildMessageRepository.save(guildMessage);
     }
 
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
+    public void updateDescription(final UpdateGuildDescriptionDto dto, final long playerId) {
+        final Player player = getPlayer(playerId);
+        final GuildMember guildMember = getGuildMember(player);
+        validatePlayerRankCanUpdateDescription(guildMember);
+        final Guild guild = guildMember.getGuild();
+        guild.setDescription(dto.getDescription());
+    }
+
     private Guild getGuildIfExistsOrElseThrowException(long playerId) {
         final Guild guild = guildRepository.findGuildForPlayerId(playerId);
         if (guild == null)
@@ -296,6 +305,12 @@ public class GuildService {
     private static void validatePlayerRankCanUpgradeTreasureAndInstructor(GuildMember guildMember) {
         if (!Rank.CAN_UPGRADE_TREASURE_AND_INSTRUCTOR.contains(guildMember.getPlayerRank())) {
             throw new RuntimeException("Can't upgrade treasure and instructor.");
+        }
+    }
+
+    private static void validatePlayerRankCanUpdateDescription(GuildMember guildMember) {
+        if (!Rank.CAN_UPDATE_DESCRIPTION.contains(guildMember.getPlayerRank())) {
+            throw new RuntimeException("Can't update description.");
         }
     }
 

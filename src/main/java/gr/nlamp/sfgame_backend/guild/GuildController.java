@@ -80,4 +80,11 @@ public class GuildController {
         guildService.sendMessage(dto, playerId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @PutMapping("description/{playerId}")
+    public ResponseEntity<Void> updateDescription(@PathVariable("playerId") long playerId,
+                                            @RequestBody @Valid UpdateGuildDescriptionDto dto) {
+        guildService.updateDescription(dto, playerId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
