@@ -99,7 +99,13 @@ public class GuildService {
         final GuildInvitation invitation = getInvitationIfExists(dto, playerId);
         invitation.setStatus(GuildInvitationStatus.ACCEPTED);
 
-        createGuildMemberForPlayer(invitation.getGuild(), player, Rank.MEMBER);
+        final Guild guild = invitation.getGuild();
+        createGuildMemberForPlayer(guild, player, Rank.MEMBER);
+
+        final GuildMessage guildMessage = new GuildMessage();
+        guildMessage.setGuild(guild);
+        guildMessage.setMessage(messageSource.getMessage("guild.join", new String[]{player.getUsername()}, LocaleContextHolder.getLocale()));
+        guildMessageRepository.save(guildMessage);
     }
 
     @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
