@@ -12,6 +12,6 @@ import java.util.TreeSet;
 @AllArgsConstructor
 public class GuildMessagesDto {
 
-    private Set<GuildMessageDto> messageDtoList = new TreeSet<>();
+    private Set<GuildMessageDto> messageDtoList;
 
 }

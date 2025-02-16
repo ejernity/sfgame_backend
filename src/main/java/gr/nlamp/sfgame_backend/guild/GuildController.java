@@ -87,4 +87,9 @@ public class GuildController {
         guildService.updateDescription(dto, playerId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @GetMapping("{playerId}")
+    public ResponseEntity<GuildDto> getGuild(@PathVariable("playerId") long playerId) {
+        return new ResponseEntity<>(guildService.getGuild(playerId), HttpStatus.OK);
+    }
 }

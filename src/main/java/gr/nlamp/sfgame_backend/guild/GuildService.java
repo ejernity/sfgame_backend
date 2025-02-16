@@ -24,6 +24,7 @@ public class GuildService {
     private final GuildMessageRepository guildMessageRepository;
 
     private final GuildMessageMapper guildMessageMapper = GuildMessageMapper.INSTANCE;
+    private final GuildMapper guildMapper = GuildMapper.INSTANCE;
 
     private static final BigInteger COINS_TO_CREATE_GUILD = BigInteger.valueOf(10);
     private static final int MAX_TREASURE_INSTRUCTOR_LEVEL = 25;
@@ -100,6 +101,7 @@ public class GuildService {
         invitation.setStatus(GuildInvitationStatus.ACCEPTED);
 
         final Guild guild = invitation.getGuild();
+        validateGuildHasEnoughSpaceToInvitePlayer(guild);
         createGuildMemberForPlayer(guild, player, Rank.MEMBER);
 
         final GuildMessage guildMessage = new GuildMessage();
@@ -212,6 +214,11 @@ public class GuildService {
         validatePlayerRankCanUpdateDescription(guildMember);
         final Guild guild = guildMember.getGuild();
         guild.setDescription(dto.getDescription());
+    }
+
+    public GuildDto getGuild(final long playerId) {
+        // TODO Investigate why this query causes extra queries to fetch magic mirror for each guild member (two)
+        return guildMapper.toDto(guildRepository.findGuildForPlayerIdWithMembers(playerId));
     }
 
     private Guild getGuildIfExistsOrElseThrowException(long playerId) {

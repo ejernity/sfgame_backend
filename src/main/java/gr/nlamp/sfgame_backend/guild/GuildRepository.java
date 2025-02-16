@@ -1,5 +1,6 @@
 package gr.nlamp.sfgame_backend.guild;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,5 +18,12 @@ public interface GuildRepository extends JpaRepository<Guild, Long> {
     Guild findGuildForPlayerId(@Param("playerId") final long playerId);
 
     Optional<Guild> findByName(String name);
+
+    @Query("SELECT g " +
+            "FROM Guild g " +
+            "JOIN FETCH GuildMember gm ON g.id = gm.guild.id " +
+            "WHERE gm.player.id = :playerId")
+    @EntityGraph(attributePaths = {"guildMembers.player"})
+    Guild findGuildForPlayerIdWithMembers(@Param("playerId") final long playerId);
 
 }
