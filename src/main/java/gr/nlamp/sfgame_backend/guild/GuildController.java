@@ -73,4 +73,11 @@ public class GuildController {
     public ResponseEntity<GuildMessagesDto> getMessages(@PathVariable("playerId") long playerId) {
         return new ResponseEntity<>(guildService.getMessages(playerId), HttpStatus.OK);
     }
+
+    @PostMapping("messages/{playerId}")
+    public ResponseEntity<Void> sendMessage(@PathVariable("playerId") long playerId,
+                                            @RequestBody @Valid PostGuildMessageDto dto) {
+        guildService.sendMessage(dto, playerId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

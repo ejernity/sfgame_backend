@@ -183,12 +183,27 @@ public class GuildService {
     }
 
     public GuildMessagesDto getMessages(final long playerId) {
+        final Guild guild = getGuildIfExistsOrElseThrowException(playerId);
+        final Set<GuildMessage> guildMessageSet = guildMessageRepository.findByGuildIdOrderByTimeStampAsc(guild.getId());
+        return new GuildMessagesDto(guildMessageMapper.mapSet(guildMessageSet));
+    }
+
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
+    public void sendMessage(final PostGuildMessageDto dto, final long playerId) {
+        final Player player = getPlayer(playerId);
+        final Guild guild = getGuildIfExistsOrElseThrowException(playerId);
+        final GuildMessage guildMessage = new GuildMessage();
+        guildMessage.setGuild(guild);
+        guildMessage.setPlayer(player);
+        guildMessage.setMessage(dto.getMessage());
+        guildMessageRepository.save(guildMessage);
+    }
+
+    private Guild getGuildIfExistsOrElseThrowException(long playerId) {
         final Guild guild = guildRepository.findGuildForPlayerId(playerId);
         if (guild == null)
             throw new RuntimeException("Player do not belong to a guild.");
-
-        final Set<GuildMessage> guildMessageSet = guildMessageRepository.findByGuildIdOrderByTimeStampAsc(guild.getId());
-        return new GuildMessagesDto(guildMessageMapper.mapSet(guildMessageSet));
+        return guild;
     }
 
     private void validateDonateQuantityDto(DonateQuantityDto dto, DonationType donationType) {
