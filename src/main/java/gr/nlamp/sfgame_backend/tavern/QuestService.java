@@ -2,6 +2,7 @@ package gr.nlamp.sfgame_backend.tavern;
 
 import gr.nlamp.sfgame_backend.player.Player;
 import gr.nlamp.sfgame_backend.player.PlayerRepository;
+import gr.nlamp.sfgame_backend.player.PlayerService;
 import gr.nlamp.sfgame_backend.player.PlayerState;
 import gr.nlamp.sfgame_backend.stable.MountService;
 import jakarta.transaction.Transactional;
@@ -20,6 +21,7 @@ public class QuestService {
     private final PlayerRepository playerRepository;
     private final QuestGenerator questGenerator;
     private final MountService mountService;
+    private final PlayerService playerService;
     private final QuestMapper questMapper = QuestMapper.INSTANCE;
 
     private static final int BEER_ENERGY = 20;
@@ -60,7 +62,7 @@ public class QuestService {
         player.setPlayerState(PlayerState.IDLE);
     }
 
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
     public RewardDto finish(final long playerId) {
         final Player player = getPlayer(playerId);
         validatePlayerState(player, PlayerState.QUEST);
@@ -70,13 +72,12 @@ public class QuestService {
         player.setPlayerState(PlayerState.IDLE);
         player.setCoins(player.getCoins().add(quest.getCoins()));
         player.setMushrooms(player.getMushrooms() + quest.getMushrooms());
-        player.setGainedExperience(player.getGainedExperience().add(quest.getExperience()));
         final BigDecimal mountBooster = player.getMount() != null ? BigDecimal.valueOf(player.getMount().getPercentageBooster()) : BigDecimal.ONE;
         player.setCurrentEnergy(player.getCurrentEnergy().subtract(quest.getDuration().multiply(mountBooster)));
         player.setTotalUsedEnergy(player.getTotalUsedEnergy().add(quest.getDuration().multiply(mountBooster)));
         player.setNumberOfSuccessQuests(player.getNumberOfSuccessQuests() + 1);
         questGenerator.generateQuests(player, false);
-        // TODO check for level up
+        playerService.addExperience(player, quest.getExperience());
         // TODO Add item in bag if quest gives an item.
         //  If not space exists for the item, throw an exception with appropriate error message for the player
         return questMapper.toRewardDto(quest);
