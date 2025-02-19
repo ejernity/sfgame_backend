@@ -2,6 +2,7 @@ package gr.nlamp.sfgame_backend.player;
 
 import gr.nlamp.sfgame_backend.initialization.BigDataLoader;
 import gr.nlamp.sfgame_backend.player.dto.BasicInfoDto;
+import gr.nlamp.sfgame_backend.player.dto.ProfileMainInfoDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -35,9 +36,23 @@ public class PlayerService {
         increaseSkill(player, skillType);
     }
 
-    public BasicInfoDto getBasicInfo(long playerId) {
+    public BasicInfoDto getBasicInfo(final long playerId) {
         final Player player = getPlayer(playerId);
         return new BasicInfoDto(player.getLevel(), player.getCoins(), player.getMushrooms());
+    }
+
+    public ProfileMainInfoDto getProfileMainInfo(final long playerId) {
+        final Player player = getPlayer(playerId);
+        final BigInteger expForNextLevel = getExperienceForNextLevel(player.getLevel());
+        final ProfileMainInfoDto profileMainInfoDto = new ProfileMainInfoDto();
+        profileMainInfoDto.setUsername(player.getUsername());
+        profileMainInfoDto.setLevel(player.getLevel());
+        profileMainInfoDto.setDescription(player.getDescription());
+        profileMainInfoDto.setHonor(player.getHonor());
+        profileMainInfoDto.setGainedExperience(player.getGainedExperience());
+        profileMainInfoDto.setNumberOfSuccessQuests(player.getNumberOfSuccessQuests());
+        profileMainInfoDto.setExperienceForNextLevel(expForNextLevel);
+        return profileMainInfoDto;
     }
 
     public void addExperience(final Player player, final BigInteger experience) {

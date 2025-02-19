@@ -1,6 +1,7 @@
 package gr.nlamp.sfgame_backend.player;
 
 import gr.nlamp.sfgame_backend.player.dto.BasicInfoDto;
+import gr.nlamp.sfgame_backend.player.dto.ProfileMainInfoDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,5 +28,10 @@ public class PlayerController {
     @GetMapping("basic-info/{playerId}")
     public ResponseEntity<BasicInfoDto> getBasicInfo(@PathVariable("playerId") long playerId) {
         return new ResponseEntity<>(playerService.getBasicInfo(playerId), HttpStatus.OK);
+    }
+
+    @GetMapping("profile-main-info/{playerId}")
+    public ResponseEntity<ProfileMainInfoDto> getProfileMainInfo(@PathVariable("playerId") long playerId) {
+        return new ResponseEntity<>(playerService.getProfileMainInfo(playerId), HttpStatus.OK);
     }
 }
