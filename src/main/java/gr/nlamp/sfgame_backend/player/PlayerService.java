@@ -1,6 +1,7 @@
 package gr.nlamp.sfgame_backend.player;
 
 import gr.nlamp.sfgame_backend.initialization.BigDataLoader;
+import gr.nlamp.sfgame_backend.player.dto.BasicInfoDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -32,6 +33,11 @@ public class PlayerService {
     public void increaseSkill(final long playerId, final SkillType skillType) {
         final Player player = getPlayer(playerId);
         increaseSkill(player, skillType);
+    }
+
+    public BasicInfoDto getBasicInfo(long playerId) {
+        final Player player = getPlayer(playerId);
+        return new BasicInfoDto(player.getLevel(), player.getCoins(), player.getMushrooms());
     }
 
     public void addExperience(final Player player, final BigInteger experience) {
