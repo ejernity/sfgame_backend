@@ -45,4 +45,6 @@ public enum SlotType {
             SlotType.WEAPON_SHOP_3, SlotType.WEAPON_SHOP_4,
             SlotType.WEAPON_SHOP_5, SlotType.WEAPON_SHOP_6
     );
+
+    public static final List<SlotType> equipmentSlots = List.of(EQUIPMENT);
 }

@@ -1,7 +1,12 @@
 package gr.nlamp.sfgame_backend.player;
 
 import gr.nlamp.sfgame_backend.initialization.BigDataLoader;
+import gr.nlamp.sfgame_backend.item.Item;
+import gr.nlamp.sfgame_backend.item.ItemMapper;
+import gr.nlamp.sfgame_backend.item.ItemRepository;
+import gr.nlamp.sfgame_backend.item.SlotType;
 import gr.nlamp.sfgame_backend.player.dto.BasicInfoDto;
+import gr.nlamp.sfgame_backend.player.dto.EquipmentItemDtoList;
 import gr.nlamp.sfgame_backend.player.dto.ProfileMainInfoDto;
 import gr.nlamp.sfgame_backend.player.dto.UpdateDescriptionDto;
 import jakarta.transaction.Transactional;
@@ -12,12 +17,16 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class PlayerService {
 
     private final PlayerRepository playerRepository;
+    private final ItemRepository itemRepository;
+
+    private final ItemMapper itemMapper = ItemMapper.INSTANCE;
 
     private static BigInteger[] expValues;
 
@@ -77,6 +86,11 @@ public class PlayerService {
             newDescription = newDescription.substring(0, maxLength);
         }
         player.setDescription(newDescription);
+    }
+
+    public EquipmentItemDtoList getEquipment(final long playerId) {
+        final List<Item> itemList = itemRepository.findItemsInSlotTypes(playerId, SlotType.equipmentSlots);
+        return new EquipmentItemDtoList(itemMapper.mapItemsToEquipmentItemDtos(itemList));
     }
 
     private void increaseSkill(final Player player, final SkillType skillType) {

@@ -1,6 +1,7 @@
 package gr.nlamp.sfgame_backend.player;
 
 import gr.nlamp.sfgame_backend.player.dto.BasicInfoDto;
+import gr.nlamp.sfgame_backend.player.dto.EquipmentItemDtoList;
 import gr.nlamp.sfgame_backend.player.dto.ProfileMainInfoDto;
 import gr.nlamp.sfgame_backend.player.dto.UpdateDescriptionDto;
 import lombok.RequiredArgsConstructor;
@@ -38,5 +39,10 @@ public class PlayerController {
                                                   @RequestBody UpdateDescriptionDto dto) {
         playerService.updateDescription(dto, playerId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("equipment/{playerId}")
+    public ResponseEntity<EquipmentItemDtoList> getEquipment(@PathVariable("playerId") long playerId) {
+        return new ResponseEntity<>(playerService.getEquipment(playerId), HttpStatus.OK);
     }
 }
