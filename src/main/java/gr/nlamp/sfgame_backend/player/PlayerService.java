@@ -5,10 +5,7 @@ import gr.nlamp.sfgame_backend.item.Item;
 import gr.nlamp.sfgame_backend.item.ItemMapper;
 import gr.nlamp.sfgame_backend.item.ItemRepository;
 import gr.nlamp.sfgame_backend.item.SlotType;
-import gr.nlamp.sfgame_backend.player.dto.BasicInfoDto;
-import gr.nlamp.sfgame_backend.player.dto.EquipmentItemDtoList;
-import gr.nlamp.sfgame_backend.player.dto.ProfileMainInfoDto;
-import gr.nlamp.sfgame_backend.player.dto.UpdateDescriptionDto;
+import gr.nlamp.sfgame_backend.player.dto.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -91,6 +88,11 @@ public class PlayerService {
     public EquipmentItemDtoList getEquipment(final long playerId) {
         final List<Item> itemList = itemRepository.findItemsInSlotTypes(playerId, SlotType.equipmentSlots);
         return new EquipmentItemDtoList(itemMapper.mapItemsToEquipmentItemDtos(itemList));
+    }
+
+    public BagItemDtoList getBag(final long playerId) {
+        final List<Item> itemList = itemRepository.findItemsInSlotTypes(playerId, SlotType.bagSlots);
+        return new BagItemDtoList(itemMapper.mapItemsToBagItemDtos(itemList));
     }
 
     private void increaseSkill(final Player player, final SkillType skillType) {

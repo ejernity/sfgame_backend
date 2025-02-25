@@ -1,9 +1,6 @@
 package gr.nlamp.sfgame_backend.player;
 
-import gr.nlamp.sfgame_backend.player.dto.BasicInfoDto;
-import gr.nlamp.sfgame_backend.player.dto.EquipmentItemDtoList;
-import gr.nlamp.sfgame_backend.player.dto.ProfileMainInfoDto;
-import gr.nlamp.sfgame_backend.player.dto.UpdateDescriptionDto;
+import gr.nlamp.sfgame_backend.player.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,5 +41,10 @@ public class PlayerController {
     @GetMapping("equipment/{playerId}")
     public ResponseEntity<EquipmentItemDtoList> getEquipment(@PathVariable("playerId") long playerId) {
         return new ResponseEntity<>(playerService.getEquipment(playerId), HttpStatus.OK);
+    }
+
+    @GetMapping("bag/{playerId}")
+    public ResponseEntity<BagItemDtoList> getBag(@PathVariable("playerId") long playerId) {
+        return new ResponseEntity<>(playerService.getBag(playerId), HttpStatus.OK);
     }
 }
