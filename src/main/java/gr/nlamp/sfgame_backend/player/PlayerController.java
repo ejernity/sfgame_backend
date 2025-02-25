@@ -2,13 +2,11 @@ package gr.nlamp.sfgame_backend.player;
 
 import gr.nlamp.sfgame_backend.player.dto.BasicInfoDto;
 import gr.nlamp.sfgame_backend.player.dto.ProfileMainInfoDto;
+import gr.nlamp.sfgame_backend.player.dto.UpdateDescriptionDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("player")
@@ -33,5 +31,12 @@ public class PlayerController {
     @GetMapping("profile-main-info/{playerId}")
     public ResponseEntity<ProfileMainInfoDto> getProfileMainInfo(@PathVariable("playerId") long playerId) {
         return new ResponseEntity<>(playerService.getProfileMainInfo(playerId), HttpStatus.OK);
+    }
+
+    @PutMapping("description/{playerId}")
+    public ResponseEntity<Void> updateDescription(@PathVariable("playerId") long playerId,
+                                                  @RequestBody UpdateDescriptionDto dto) {
+        playerService.updateDescription(dto, playerId);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -3,6 +3,7 @@ package gr.nlamp.sfgame_backend.player;
 import gr.nlamp.sfgame_backend.initialization.BigDataLoader;
 import gr.nlamp.sfgame_backend.player.dto.BasicInfoDto;
 import gr.nlamp.sfgame_backend.player.dto.ProfileMainInfoDto;
+import gr.nlamp.sfgame_backend.player.dto.UpdateDescriptionDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -21,6 +22,8 @@ public class PlayerService {
     private static BigInteger[] expValues;
 
     private static BigInteger[] skillValues;
+
+    private final static int MAX_NUM_OF_CHARACTERS_FOR_DESCRIPTION = 255;
 
     @EventListener(ApplicationReadyEvent.class)
     public void initializeBigNumbers() {
@@ -63,6 +66,17 @@ public class PlayerService {
             player.setLevel(player.getLevel() + 1);
             expForNextLevel = getExperienceForNextLevel(player.getLevel());
         }
+    }
+
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
+    public void updateDescription(final UpdateDescriptionDto dto, final long playerId) {
+        final Player player = getPlayer(playerId);
+        String newDescription = dto.getDescription();
+        if (dto.getDescription() != null) {
+            final int maxLength = Math.min(dto.getDescription().length(), MAX_NUM_OF_CHARACTERS_FOR_DESCRIPTION);
+            newDescription = newDescription.substring(0, maxLength);
+        }
+        player.setDescription(newDescription);
     }
 
     private void increaseSkill(final Player player, final SkillType skillType) {

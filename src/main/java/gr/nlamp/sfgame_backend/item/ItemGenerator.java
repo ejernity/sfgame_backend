@@ -2,15 +2,11 @@ package gr.nlamp.sfgame_backend.item;
 
 import gr.nlamp.sfgame_backend.item.strategy.ItemGenerationStrategy;
 import gr.nlamp.sfgame_backend.item.strategy.ItemStrategyFactory;
-import gr.nlamp.sfgame_backend.player.Class;
 import gr.nlamp.sfgame_backend.player.Player;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 

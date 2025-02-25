@@ -1,11 +1,11 @@
 package gr.nlamp.sfgame_backend.item.strategy;
 
-import gr.nlamp.sfgame_backend.item.*;
+import gr.nlamp.sfgame_backend.item.Item;
+import gr.nlamp.sfgame_backend.item.ItemType;
+import gr.nlamp.sfgame_backend.item.SlotType;
 import gr.nlamp.sfgame_backend.player.Player;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Random;
 
 public class DungeonKeyItemStrategy implements ItemGenerationStrategy {
 

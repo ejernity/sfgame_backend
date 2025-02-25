@@ -1,6 +1,9 @@
 package gr.nlamp.sfgame_backend.item.strategy;
 
-import gr.nlamp.sfgame_backend.item.*;
+import gr.nlamp.sfgame_backend.item.Item;
+import gr.nlamp.sfgame_backend.item.ItemType;
+import gr.nlamp.sfgame_backend.item.PotionType;
+import gr.nlamp.sfgame_backend.item.SlotType;
 import gr.nlamp.sfgame_backend.item.booster.Booster;
 import gr.nlamp.sfgame_backend.player.Player;
 
