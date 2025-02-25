@@ -41,11 +41,14 @@ public class QuestService {
     }
 
     private void refreshEnergyIfNeeded(Player player) {
+        if (player.getLastTavernAccessDate() == null)
+            return;
         final LocalDate now = LocalDate.now();
         final LocalDate lastTavernAccess = Instant.ofEpochMilli(player.getLastTavernAccessDate()).atZone(ZoneId.systemDefault()).toLocalDate();
         if (!now.equals(lastTavernAccess)) {
-            // TODO Refresh the energy
-            System.out.println("Refresh energy!");
+            player.setCurrentEnergy(BigDecimal.valueOf(100));
+            player.setTotalUsedEnergy(BigDecimal.ZERO);
+            player.setTotalBeersDrink(0);
         }
     }
 
