@@ -10,6 +10,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,10 +30,23 @@ public class QuestService {
 
     private static final int BEER_ENERGY = 20;
 
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
     public QuestsDto getAll(final long playerId) {
+        final Player player = getPlayer(playerId);
         final List<Quest> quests = questRepository.findAllByPlayerId(playerId);
-        mountService.clearInactiveMount(quests.get(0).getPlayer());
+        mountService.clearInactiveMount(player);
+        refreshEnergyIfNeeded(player);
+        player.setLastTavernAccessDate(System.currentTimeMillis());
         return new QuestsDto(questMapper.mapList(quests));
+    }
+
+    private void refreshEnergyIfNeeded(Player player) {
+        final LocalDate now = LocalDate.now();
+        final LocalDate lastTavernAccess = Instant.ofEpochMilli(player.getLastTavernAccessDate()).atZone(ZoneId.systemDefault()).toLocalDate();
+        if (!now.equals(lastTavernAccess)) {
+            // TODO Refresh the energy
+            System.out.println("Refresh energy!");
+        }
     }
 
     @Transactional(rollbackOn = Exception.class)
