@@ -1,10 +1,10 @@
 package gr.nlamp.sfgame_backend.player;
 
 import gr.nlamp.sfgame_backend.initialization.BigDataLoader;
-import gr.nlamp.sfgame_backend.item.Item;
-import gr.nlamp.sfgame_backend.item.ItemMapper;
-import gr.nlamp.sfgame_backend.item.ItemRepository;
-import gr.nlamp.sfgame_backend.item.SlotType;
+import gr.nlamp.sfgame_backend.item.*;
+import gr.nlamp.sfgame_backend.item.booster.Booster;
+import gr.nlamp.sfgame_backend.item.booster.BoosterMapper;
+import gr.nlamp.sfgame_backend.item.booster.BoosterRepository;
 import gr.nlamp.sfgame_backend.player.dto.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +22,10 @@ public class PlayerService {
 
     private final PlayerRepository playerRepository;
     private final ItemRepository itemRepository;
+    private final BoosterRepository boosterRepository;
 
     private final ItemMapper itemMapper = ItemMapper.INSTANCE;
+    private final BoosterMapper boosterMapper = BoosterMapper.INSTANCE;
 
     private static BigInteger[] expValues;
 
@@ -87,7 +89,8 @@ public class PlayerService {
 
     public EquipmentItemDtoList getEquipment(final long playerId) {
         final List<Item> itemList = itemRepository.findItemsInSlotTypes(playerId, SlotType.equipmentSlots);
-        return new EquipmentItemDtoList(itemMapper.mapItemsToEquipmentItemDtos(itemList));
+        final List<Item> filteredItemListWithoutBoosters = itemList.stream().filter(i -> !i.getItemType().equals(ItemType.POTION)).toList();
+        return new EquipmentItemDtoList(itemMapper.mapItemsToEquipmentItemDtos(filteredItemListWithoutBoosters));
     }
 
     public BagItemDtoList getBag(final long playerId) {
@@ -103,6 +106,11 @@ public class PlayerService {
     public ShopItemDtoList getMagicShop(final long playerId) {
         final List<Item> itemList = itemRepository.findItemsInSlotTypes(playerId, SlotType.magicShopSlots);
         return new ShopItemDtoList(itemMapper.mapItemsToShopItemDtos(itemList));
+    }
+
+    public BoosterDtoList getBoosters(final long playerId) {
+        final List<Booster> boosterList = boosterRepository.findByPlayerIdAndSlotType(playerId, SlotType.EQUIPMENT);
+        return new BoosterDtoList(boosterMapper.mapBoostersToBoosterDtos(boosterList));
     }
 
     private void increaseSkill(final Player player, final SkillType skillType) {

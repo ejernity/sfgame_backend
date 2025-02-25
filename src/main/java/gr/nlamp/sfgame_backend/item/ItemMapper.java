@@ -1,7 +1,6 @@
 package gr.nlamp.sfgame_backend.item;
 
 import gr.nlamp.sfgame_backend.player.dto.BagItemDto;
-import gr.nlamp.sfgame_backend.player.dto.BagItemDtoList;
 import gr.nlamp.sfgame_backend.player.dto.EquipmentItemDto;
 import gr.nlamp.sfgame_backend.player.dto.ShopItemDto;
 import org.mapstruct.*;
