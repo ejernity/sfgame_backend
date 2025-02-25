@@ -52,4 +52,9 @@ public class PlayerController {
     public ResponseEntity<ShopItemDtoList> getWeaponShop(@PathVariable("playerId") long playerId) {
         return new ResponseEntity<>(playerService.getWeaponShop(playerId), HttpStatus.OK);
     }
+
+    @GetMapping("magic-shop/{playerId}")
+    public ResponseEntity<ShopItemDtoList> getMagicShop(@PathVariable("playerId") long playerId) {
+        return new ResponseEntity<>(playerService.getMagicShop(playerId), HttpStatus.OK);
+    }
 }

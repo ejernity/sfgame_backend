@@ -100,6 +100,11 @@ public class PlayerService {
         return new ShopItemDtoList(itemMapper.mapItemsToShopItemDtos(itemList));
     }
 
+    public ShopItemDtoList getMagicShop(final long playerId) {
+        final List<Item> itemList = itemRepository.findItemsInSlotTypes(playerId, SlotType.magicShopSlots);
+        return new ShopItemDtoList(itemMapper.mapItemsToShopItemDtos(itemList));
+    }
+
     private void increaseSkill(final Player player, final SkillType skillType) {
         BigInteger skillCoinCost;
         switch (skillType) {
