@@ -95,6 +95,11 @@ public class PlayerService {
         return new BagItemDtoList(itemMapper.mapItemsToBagItemDtos(itemList));
     }
 
+    public ShopItemDtoList getWeaponShop(final long playerId) {
+        final List<Item> itemList = itemRepository.findItemsInSlotTypes(playerId, SlotType.weaponShopSlots);
+        return new ShopItemDtoList(itemMapper.mapItemsToShopItemDtos(itemList));
+    }
+
     private void increaseSkill(final Player player, final SkillType skillType) {
         BigInteger skillCoinCost;
         switch (skillType) {

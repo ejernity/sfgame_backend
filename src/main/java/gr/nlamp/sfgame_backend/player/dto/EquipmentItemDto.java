@@ -21,6 +21,6 @@ public class EquipmentItemDto {
     private int constitution;
     private int luck;
     private int armor;
-    private BigInteger coinsFromSell;
+    private BigInteger coinCost;
 
 }

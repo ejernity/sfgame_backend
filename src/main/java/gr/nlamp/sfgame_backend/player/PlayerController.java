@@ -47,4 +47,9 @@ public class PlayerController {
     public ResponseEntity<BagItemDtoList> getBag(@PathVariable("playerId") long playerId) {
         return new ResponseEntity<>(playerService.getBag(playerId), HttpStatus.OK);
     }
+
+    @GetMapping("weapon-shop/{playerId}")
+    public ResponseEntity<ShopItemDtoList> getWeaponShop(@PathVariable("playerId") long playerId) {
+        return new ResponseEntity<>(playerService.getWeaponShop(playerId), HttpStatus.OK);
+    }
 }
