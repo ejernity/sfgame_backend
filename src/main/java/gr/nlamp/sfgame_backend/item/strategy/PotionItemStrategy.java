@@ -33,7 +33,7 @@ public class PotionItemStrategy implements ItemGenerationStrategy {
     }
 
     private BigInteger getCoinCost(Booster booster, Player player) {
-        final long baseCoinCost = player.getLevel() * 20;  // Base cost starts at 20 coins at level 1
+        final long baseCoinCost = (player.getLevel() + 1) * 20;  // Base cost starts at 20 coins at level 1
         final double multiplier = switch (booster.getPotionType().name().split("_")[1]) {
             case "SMALL" -> 1.0;
             case "MEDIUM" -> 1.5;

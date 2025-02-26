@@ -37,6 +37,7 @@ public class PlayerService {
     private static BigInteger[] skillValues;
 
     private final static int MAX_NUM_OF_CHARACTERS_FOR_DESCRIPTION = 255;
+    private final static int MUSHROOM_TO_REFRESH_ITEMS = 1;
 
     @EventListener(ApplicationReadyEvent.class)
     public void initializeBigNumbers() {
@@ -124,6 +125,39 @@ public class PlayerService {
     public BoosterDtoList getBoosters(final long playerId) {
         final List<Booster> boosterList = boosterRepository.findByPlayerIdAndSlotType(playerId, SlotType.EQUIPMENT);
         return new BoosterDtoList(boosterMapper.mapBoostersToBoosterDtos(boosterList));
+    }
+
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
+    public ShopItemDtoList refreshWeaponShop(final long playerId) {
+        final Player player = getPlayer(playerId);
+        validateHasEnoughMushroomsForRefreshingItems(player.getMushrooms());
+        player.setMushrooms(player.getMushrooms() - MUSHROOM_TO_REFRESH_ITEMS);
+        itemGenerator.generateWeaponShopItems(player, false);
+        // TODO Think what happens if player refresh items
+        //  then keep the weapon shop screen open
+        //  the day changes
+        //  and hits again the screen, so the last access date is yesterday and the items will change!
+        final List<Item> itemList = itemRepository.findItemsInSlotTypes(playerId, SlotType.weaponShopSlots);
+        return new ShopItemDtoList(itemMapper.mapItemsToShopItemDtos(itemList));
+    }
+
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
+    public ShopItemDtoList refreshMagicShop(final long playerId) {
+        final Player player = getPlayer(playerId);
+        validateHasEnoughMushroomsForRefreshingItems(player.getMushrooms());
+        player.setMushrooms(player.getMushrooms() - MUSHROOM_TO_REFRESH_ITEMS);
+        itemGenerator.generateMagicShopItems(player, false);
+        // TODO Think what happens if player refresh items
+        //  then keep the magic shop screen open
+        //  the day changes
+        //  and hits again the screen, so the last access date is yesterday and the items will change!
+        final List<Item> itemList = itemRepository.findItemsInSlotTypes(playerId, SlotType.magicShopSlots);
+        return new ShopItemDtoList(itemMapper.mapItemsToShopItemDtos(itemList));
+    }
+
+    private void validateHasEnoughMushroomsForRefreshingItems(final long mushrooms) {
+        if (mushrooms < MUSHROOM_TO_REFRESH_ITEMS)
+            throw new RuntimeException("Not enough mushrooms to refresh items.");
     }
 
     private void refreshWeaponShopItemsIfNeeded(Player player) {

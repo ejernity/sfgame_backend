@@ -63,5 +63,13 @@ public class PlayerController {
         return new ResponseEntity<>(playerService.getBoosters(playerId), HttpStatus.OK);
     }
 
+    @GetMapping("weapon-shop/refresh/{playerId}")
+    public ResponseEntity<ShopItemDtoList> refreshWeaponShop(@PathVariable("playerId") long playerId) {
+        return new ResponseEntity<>(playerService.refreshWeaponShop(playerId), HttpStatus.OK);
+    }
 
+    @GetMapping("magic-shop/refresh/{playerId}")
+    public ResponseEntity<ShopItemDtoList> refreshMagicShop(@PathVariable("playerId") long playerId) {
+        return new ResponseEntity<>(playerService.refreshMagicShop(playerId), HttpStatus.OK);
+    }
 }
