@@ -65,6 +65,10 @@ public class Player {
 
     private Long lastTavernAccessDate;
 
+    private Long lastWeaponShopAccessDate;
+
+    private Long lastMagicShopAccessDate;
+
     @Column(columnDefinition = "ENUM('WARRIOR','MAGE','SCOUT')")
     @Enumerated(value = EnumType.STRING)
     private Class playerClass;

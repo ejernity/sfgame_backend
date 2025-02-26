@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -23,6 +26,8 @@ public class PlayerService {
     private final PlayerRepository playerRepository;
     private final ItemRepository itemRepository;
     private final BoosterRepository boosterRepository;
+
+    private final ItemGenerator itemGenerator;
 
     private final ItemMapper itemMapper = ItemMapper.INSTANCE;
     private final BoosterMapper boosterMapper = BoosterMapper.INSTANCE;
@@ -98,12 +103,20 @@ public class PlayerService {
         return new BagItemDtoList(itemMapper.mapItemsToBagItemDtos(itemList));
     }
 
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
     public ShopItemDtoList getWeaponShop(final long playerId) {
+        final Player player = getPlayer(playerId);
+        refreshWeaponShopItemsIfNeeded(player);
+        player.setLastWeaponShopAccessDate(System.currentTimeMillis());
         final List<Item> itemList = itemRepository.findItemsInSlotTypes(playerId, SlotType.weaponShopSlots);
         return new ShopItemDtoList(itemMapper.mapItemsToShopItemDtos(itemList));
     }
 
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
     public ShopItemDtoList getMagicShop(final long playerId) {
+        final Player player = getPlayer(playerId);
+        refreshMagicShopItemsIfNeeded(player);
+        player.setLastMagicShopAccessDate(System.currentTimeMillis());
         final List<Item> itemList = itemRepository.findItemsInSlotTypes(playerId, SlotType.magicShopSlots);
         return new ShopItemDtoList(itemMapper.mapItemsToShopItemDtos(itemList));
     }
@@ -111,6 +124,26 @@ public class PlayerService {
     public BoosterDtoList getBoosters(final long playerId) {
         final List<Booster> boosterList = boosterRepository.findByPlayerIdAndSlotType(playerId, SlotType.EQUIPMENT);
         return new BoosterDtoList(boosterMapper.mapBoostersToBoosterDtos(boosterList));
+    }
+
+    private void refreshWeaponShopItemsIfNeeded(Player player) {
+        if (player.getLastWeaponShopAccessDate() == null)
+            return;
+        final LocalDate now = LocalDate.now();
+        final LocalDate lastWeaponShopAccessDate = Instant.ofEpochMilli(player.getLastWeaponShopAccessDate()).atZone(ZoneId.systemDefault()).toLocalDate();
+        if (!now.equals(lastWeaponShopAccessDate)) {
+            itemGenerator.generateWeaponShopItems(player, false);
+        }
+    }
+
+    private void refreshMagicShopItemsIfNeeded(Player player) {
+        if (player.getLastMagicShopAccessDate() == null)
+            return;
+        final LocalDate now = LocalDate.now();
+        final LocalDate lastMagicShopAccessDate = Instant.ofEpochMilli(player.getLastMagicShopAccessDate()).atZone(ZoneId.systemDefault()).toLocalDate();
+        if (!now.equals(lastMagicShopAccessDate)) {
+            itemGenerator.generateMagicShopItems(player, false);
+        }
     }
 
     private void increaseSkill(final Player player, final SkillType skillType) {

@@ -32,7 +32,7 @@ public class AuthenticationService {
             ApplicationContextProvider.getApplicationContext().getBean(PlayerEmailExistsValidator.class)
     );
 
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
     public void register(final RegistrationDto registrationDto) {
         for (final AuthenticationValidator validator : validators) {
             validator.validate(registrationDto);

@@ -16,7 +16,7 @@ public class ItemGenerator {
 
     private final ItemRepository itemRepository;
 
-    @Transactional
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.MANDATORY)
     public void generateWeaponShopItems(final Player player, final boolean isRegistration) {
         if (!isRegistration)
             clearShopItems(player, SlotType.weaponShopSlots);
@@ -31,7 +31,7 @@ public class ItemGenerator {
         }
     }
 
-    @Transactional
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.MANDATORY)
     public void generateMagicShopItems(final Player player, final boolean isRegistration) {
         if (!isRegistration)
             clearShopItems(player, SlotType.magicShopSlots);

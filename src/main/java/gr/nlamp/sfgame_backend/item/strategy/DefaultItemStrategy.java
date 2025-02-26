@@ -46,7 +46,7 @@ public class DefaultItemStrategy implements ItemGenerationStrategy {
     }
 
     private void setSkillValues(final Item item, final Player player) {
-        final long baseValue = player.getLevel() * 5; // Base scaling with player level
+        final long baseValue = (player.getLevel() + 1) * 5; // Base scaling with player level
         final double multiplier = switch (item.getItemRarity()) {
             case LEGENDARY -> 3.0;
             case EPIC -> 2.0;
@@ -141,7 +141,7 @@ public class DefaultItemStrategy implements ItemGenerationStrategy {
 
     private void setArmorValue(final Item item, final Player player) {
         if (ItemType.provideArmorItemTypes.contains(item.getItemType())) {
-            final long baseArmor = player.getLevel() * 10;
+            final long baseArmor = (player.getLevel() + 1) * 10;
             final double multiplier = switch (item.getItemRarity()) {
                 case LEGENDARY -> 3.0;
                 case EPIC -> 2.0;
@@ -152,7 +152,7 @@ public class DefaultItemStrategy implements ItemGenerationStrategy {
     }
 
     private void setCosts(final Item item, final Player player) {
-        final long baseCoinCost = player.getLevel() * 20;  // Base cost starts at 20 coins at level 1
+        final long baseCoinCost = (player.getLevel() + 1) * 20;  // Base cost starts at 20 coins at level 1
         final double multiplier = switch (item.getItemRarity()) {
             case LEGENDARY -> 2.5;
             case EPIC -> 1.5;

@@ -62,4 +62,6 @@ public class PlayerController {
     public ResponseEntity<BoosterDtoList> getBoosters(@PathVariable("playerId") long playerId) {
         return new ResponseEntity<>(playerService.getBoosters(playerId), HttpStatus.OK);
     }
+
+
 }
