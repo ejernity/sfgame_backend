@@ -1,13 +1,15 @@
 package gr.nlamp.sfgame_backend.guild.dto;
 
-import jakarta.validation.constraints.NotNull;
+import gr.nlamp.sfgame_backend.guild.GuildInvitationStatus;
 import lombok.Getter;
 import lombok.Setter;
 
-@Setter
 @Getter
+@Setter
 public class GuildInvitationDto {
 
-    @NotNull
-    private long playerId;
+    private long id;
+    private String guildName;
+    private GuildInvitationStatus status;
+
 }

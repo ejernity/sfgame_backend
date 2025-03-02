@@ -22,9 +22,14 @@ public class GuildController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @GetMapping("invite/{playerId}")
+    public ResponseEntity<GuildInvitationsDto> getInvitations(@PathVariable("playerId") long playerId) {
+        return new ResponseEntity<>(guildService.getInvitations(playerId), HttpStatus.OK);
+    }
+
     @PostMapping("invite/{playerId}")
     public ResponseEntity<Void> invite(@PathVariable("playerId") long playerId,
-                                       @RequestBody @Valid GuildInvitationDto dto) {
+                                       @RequestBody @Valid CreateGuildInvitationDto dto) {
         guildService.invite(dto, playerId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

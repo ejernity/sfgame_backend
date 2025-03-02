@@ -10,6 +10,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -23,6 +24,7 @@ public class GuildService {
     private final GuildMemberRepository guildMemberRepository;
     private final GuildMessageRepository guildMessageRepository;
 
+    private final GuildInvitationMapper guildInvitationMapper = GuildInvitationMapper.INSTANCE;
     private final GuildMessageMapper guildMessageMapper = GuildMessageMapper.INSTANCE;
     private final GuildMapper guildMapper = GuildMapper.INSTANCE;
 
@@ -73,7 +75,7 @@ public class GuildService {
     }
 
     @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
-    public void invite(final GuildInvitationDto dto, final long playerId) {
+    public void invite(final CreateGuildInvitationDto dto, final long playerId) {
         final Player playerToInvite = getPlayer(dto.getPlayerId());
         final Player player = getPlayer(playerId);
         final GuildMember guildMember = getGuildMember(player);
@@ -248,6 +250,11 @@ public class GuildService {
         validateGuildMembersBelongsToTheSameGuild(guildMember, otherGuildMember);
 
         guildMemberRepository.deleteByPlayerId(otherPlayer.getId());
+    }
+
+    public GuildInvitationsDto getInvitations(final long playerId) {
+        final List<GuildInvitation> guildInvitationList = guildInvitationRepository.findByPlayerIdOrderByIdAsc(playerId);
+        return new GuildInvitationsDto(guildInvitationMapper.mapList(guildInvitationList));
     }
 
     private Guild getGuildIfExistsOrElseThrowException(long playerId) {
