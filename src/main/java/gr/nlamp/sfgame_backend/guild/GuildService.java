@@ -221,6 +221,21 @@ public class GuildService {
         return guildMapper.toDto(guildRepository.findGuildForPlayerIdWithMembers(playerId));
     }
 
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
+    public void updateRank(final ChangeRankDto dto, final long playerId) {
+        validateTwoPlayersAreDifferent(playerId, dto.getPlayerId());
+        final Player player = getPlayer(playerId);
+        final GuildMember guildMember = getGuildMember(player);
+        validatePlayerRankCanUpdateGuildMemberRank(guildMember);
+
+        final Player otherPlayer = getPlayer(dto.getPlayerId());
+        final GuildMember otherGuildMember = getGuildMember(otherPlayer);
+        validateGuildMembersBelongsToTheSameGuild(guildMember, otherGuildMember);
+        validateRankUpdate(otherGuildMember.getPlayerRank(), dto.getNewRank());
+
+        otherGuildMember.setPlayerRank(dto.getNewRank());
+    }
+
     private Guild getGuildIfExistsOrElseThrowException(long playerId) {
         final Guild guild = guildRepository.findGuildForPlayerId(playerId);
         if (guild == null)
@@ -318,6 +333,36 @@ public class GuildService {
     private static void validatePlayerRankCanUpdateDescription(GuildMember guildMember) {
         if (!Rank.CAN_UPDATE_DESCRIPTION.contains(guildMember.getPlayerRank())) {
             throw new RuntimeException("Can't update description.");
+        }
+    }
+
+    private static void validatePlayerRankCanUpdateGuildMemberRank(GuildMember guildMember) {
+        if (!Rank.CAN_UPDATE_RANK.contains(guildMember.getPlayerRank())) {
+            throw new RuntimeException("Can't update ranks.");
+        }
+    }
+
+    private static void validateRankUpdate(Rank existingRank, Rank newRank) {
+        if (existingRank == newRank) {
+            throw new RuntimeException("Rank is the same as the existing rank.");
+        }
+        if (!Rank.VALID_RANK_UPDATES.containsKey(existingRank)) {
+            throw new RuntimeException("Invalid rank update for existing rank: " + existingRank);
+        }
+        if (!Rank.VALID_RANK_UPDATES.get(existingRank).equals(newRank)) {
+            throw new RuntimeException("Invalid rank update for new rank: " + newRank);
+        }
+    }
+
+    private static void validateGuildMembersBelongsToTheSameGuild(GuildMember guildMember, GuildMember otherGuildMember) {
+        if (!guildMember.getGuild().getId().equals(otherGuildMember.getGuild().getId())) {
+            throw new RuntimeException("Guild members do not belong to the same guild.");
+        }
+    }
+
+    private void validateTwoPlayersAreDifferent(long playerId, long playerId1) {
+        if (playerId == playerId1) {
+            throw new RuntimeException("You cannot update your rank!");
         }
     }
 

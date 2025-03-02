@@ -92,4 +92,11 @@ public class GuildController {
     public ResponseEntity<GuildDto> getGuild(@PathVariable("playerId") long playerId) {
         return new ResponseEntity<>(guildService.getGuild(playerId), HttpStatus.OK);
     }
+
+    @PutMapping("rank/{playerId}")
+    public ResponseEntity<Void> updateRank(@PathVariable("playerId") long playerId,
+                                           @RequestBody ChangeRankDto dto) {
+        guildService.updateRank(dto, playerId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
