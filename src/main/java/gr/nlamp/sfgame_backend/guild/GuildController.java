@@ -99,4 +99,11 @@ public class GuildController {
         guildService.updateRank(dto, playerId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @GetMapping("kick-off/{memberId}/{playerId}")
+    public ResponseEntity<Void> kickOff(@PathVariable("memberId") long memberId,
+                                        @PathVariable("playerId") long playerId) {
+        guildService.kickOff(memberId, playerId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

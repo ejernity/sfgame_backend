@@ -236,6 +236,20 @@ public class GuildService {
         otherGuildMember.setPlayerRank(dto.getNewRank());
     }
 
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
+    public void kickOff(final long memberId, final long playerId) {
+        validateTwoPlayersAreDifferent(playerId, memberId);
+        final Player player = getPlayer(playerId);
+        final GuildMember guildMember = getGuildMember(player);
+        validatePlayerCanKickOff(guildMember);
+
+        final Player otherPlayer = getPlayer(memberId);
+        final GuildMember otherGuildMember = getGuildMember(otherPlayer);
+        validateGuildMembersBelongsToTheSameGuild(guildMember, otherGuildMember);
+
+        guildMemberRepository.deleteByPlayerId(otherPlayer.getId());
+    }
+
     private Guild getGuildIfExistsOrElseThrowException(long playerId) {
         final Guild guild = guildRepository.findGuildForPlayerId(playerId);
         if (guild == null)
@@ -360,9 +374,15 @@ public class GuildService {
         }
     }
 
-    private void validateTwoPlayersAreDifferent(long playerId, long playerId1) {
+    private static void validatePlayerCanKickOff(GuildMember guildMember) {
+        if (!Rank.CAN_KICK_OFF_MEMBER.contains(guildMember.getPlayerRank())) {
+            throw new RuntimeException("Can't kick off.");
+        }
+    }
+
+    private static void validateTwoPlayersAreDifferent(long playerId, long playerId1) {
         if (playerId == playerId1) {
-            throw new RuntimeException("You cannot update your rank!");
+            throw new RuntimeException("You cannot do it to yourself!");
         }
     }
 

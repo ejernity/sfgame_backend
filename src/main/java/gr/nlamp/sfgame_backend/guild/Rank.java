@@ -17,4 +17,6 @@ public enum Rank {
     public static final List<Rank> CAN_UPDATE_RANK = List.of(LEADER, OFFICER);
 
     public static final Map<Rank, Rank> VALID_RANK_UPDATES = Map.of(OFFICER, MEMBER, MEMBER, OFFICER);
+
+    public static final List<Rank> CAN_KICK_OFF_MEMBER = List.of(LEADER);
 }
