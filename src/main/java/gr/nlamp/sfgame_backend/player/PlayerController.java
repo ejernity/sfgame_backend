@@ -72,4 +72,9 @@ public class PlayerController {
     public ResponseEntity<ShopItemDtoList> refreshMagicShop(@PathVariable("playerId") long playerId) {
         return new ResponseEntity<>(playerService.refreshMagicShop(playerId), HttpStatus.OK);
     }
+
+    @GetMapping("skills-analytical/{playerId}")
+    public ResponseEntity<SkillsAnalyticalDto> getSkillsAnalytical(@PathVariable("playerId") long playerId) {
+        return new ResponseEntity<>(playerService.getSkillsAnalytical(playerId), HttpStatus.OK);
+    }
 }

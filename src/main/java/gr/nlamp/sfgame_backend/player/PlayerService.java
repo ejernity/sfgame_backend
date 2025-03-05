@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -153,6 +154,83 @@ public class PlayerService {
         //  and hits again the screen, so the last access date is yesterday and the items will change!
         final List<Item> itemList = itemRepository.findItemsInSlotTypes(playerId, SlotType.magicShopSlots);
         return new ShopItemDtoList(itemMapper.mapItemsToShopItemDtos(itemList));
+    }
+
+    public SkillsAnalyticalDto getSkillsAnalytical(final long playerId) {
+        final Player player = getPlayer(playerId);
+        final SkillsAnalyticalDto result = new SkillsAnalyticalDto();
+        result.setBaseStrength(player.getStrength());
+        result.setBaseDexterity(player.getDexterity());
+        result.setBaseIntelligence(player.getIntelligence());
+        result.setBaseConstitution(player.getConstitution());
+        result.setBaseLuck(player.getLuck());
+
+        final List<Item> itemList = itemRepository.findItemsInSlotTypes(playerId, SlotType.equipmentSlots);
+        final List<Item> provideArmorItems = itemList.stream().filter(i -> ItemType.provideArmorItemTypes.contains(i.getItemType())).toList();
+        result.setTotalArmor(provideArmorItems.stream().map(Item::getArmor).reduce(Integer::sum).orElse(0));
+
+        final List<Item> provideSkillsItems = itemList.stream().filter(i -> !i.getItemType().equals(ItemType.POTION)).toList();
+        for (final Item item : provideSkillsItems) {
+            result.setEquipmentStrength(result.getEquipmentStrength().add(BigInteger.valueOf(item.getStrength())));
+            result.setEquipmentDexterity(result.getEquipmentDexterity().add(BigInteger.valueOf(item.getDexterity())));
+            result.setEquipmentIntelligence(result.getEquipmentIntelligence().add(BigInteger.valueOf(item.getIntelligence())));
+            result.setEquipmentConstitution(result.getEquipmentConstitution().add(BigInteger.valueOf(item.getConstitution())));
+            result.setEquipmentLuck(result.getEquipmentLuck().add(BigInteger.valueOf(item.getLuck())));
+        }
+
+        final List<Item> boosters = itemList.stream().filter(i -> i.getItemType().equals(ItemType.POTION)).toList();
+        for (final Item item : boosters) {
+            if (item instanceof Booster booster) {
+                final PotionType potionType = booster.getPotionType();
+
+                if (PotionType.STRENGTH_POTIONS.contains(potionType)) {
+                    final BigInteger boosterExtraSkill = BigDecimal.valueOf(potionType.getPercentage())
+                            .multiply(new BigDecimal(result.getBaseStrength()))
+                            .setScale(0, RoundingMode.HALF_UP)
+                            .toBigInteger();
+                    result.setBoosterStrength(boosterExtraSkill);
+                    continue;
+                }
+
+                if (PotionType.DEXTERITY_POTIONS.contains(potionType)) {
+                    final BigInteger boosterExtraSkill = BigDecimal.valueOf(potionType.getPercentage())
+                            .multiply(new BigDecimal(result.getBaseDexterity()))
+                            .setScale(0, RoundingMode.HALF_UP)
+                            .toBigInteger();
+                    result.setBoosterDexterity(boosterExtraSkill);
+                    continue;
+                }
+
+                if (PotionType.INTELLIGENCE_POTIONS.contains(potionType)) {
+                    final BigInteger boosterExtraSkill = BigDecimal.valueOf(potionType.getPercentage())
+                            .multiply(new BigDecimal(result.getBaseIntelligence()))
+                            .setScale(0, RoundingMode.HALF_UP)
+                            .toBigInteger();
+                    result.setBoosterIntelligence(boosterExtraSkill);
+                    continue;
+                }
+
+                if (PotionType.CONSTITUTION_POTIONS.contains(potionType)) {
+                    final BigInteger boosterExtraSkill = BigDecimal.valueOf(potionType.getPercentage())
+                            .multiply(new BigDecimal(result.getBaseConstitution()))
+                            .setScale(0, RoundingMode.HALF_UP)
+                            .toBigInteger();
+                    result.setBoosterConstitution(boosterExtraSkill);
+                    continue;
+                }
+
+                if (PotionType.LUCK_POTIONS.contains(potionType)) {
+                    final BigInteger boosterExtraSkill = BigDecimal.valueOf(potionType.getPercentage())
+                            .multiply(new BigDecimal(result.getBaseLuck()))
+                            .setScale(0, RoundingMode.HALF_UP)
+                            .toBigInteger();
+                    result.setBoosterLuck(boosterExtraSkill);
+                }
+            }
+        }
+
+        // TODO Do some calculation/formula way to produce hit points for the return DTO
+        return result;
     }
 
     private void validateHasEnoughMushroomsForRefreshingItems(final long mushrooms) {
