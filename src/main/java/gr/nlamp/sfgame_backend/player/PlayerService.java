@@ -17,6 +17,7 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 
@@ -231,6 +232,16 @@ public class PlayerService {
 
         // TODO Do some calculation/formula way to produce hit points for the return DTO
         return result;
+    }
+
+    public MountDto getMount(long playerId) {
+        final Player player = getPlayer(playerId);
+        final MountDto mountDto = new MountDto();
+        if (player.getMount() == null)
+            return mountDto;
+        mountDto.setMount(player.getMount());
+        mountDto.setActiveUntil(Instant.ofEpochMilli(player.getMountActiveUntil()).atZone(ZoneId.systemDefault()).toLocalDateTime());
+        return mountDto;
     }
 
     private void validateHasEnoughMushroomsForRefreshingItems(final long mushrooms) {

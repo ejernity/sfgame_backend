@@ -77,4 +77,9 @@ public class PlayerController {
     public ResponseEntity<SkillsAnalyticalDto> getSkillsAnalytical(@PathVariable("playerId") long playerId) {
         return new ResponseEntity<>(playerService.getSkillsAnalytical(playerId), HttpStatus.OK);
     }
+
+    @GetMapping("mount/{playerId}")
+    public ResponseEntity<MountDto> getMount(@PathVariable("playerId") long playerId) {
+        return new ResponseEntity<>(playerService.getMount(playerId), HttpStatus.OK);
+    }
 }
