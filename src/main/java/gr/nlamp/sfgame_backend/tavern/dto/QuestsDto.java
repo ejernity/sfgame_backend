@@ -1,4 +1,4 @@
-package gr.nlamp.sfgame_backend.tavern;
+package gr.nlamp.sfgame_backend.tavern.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

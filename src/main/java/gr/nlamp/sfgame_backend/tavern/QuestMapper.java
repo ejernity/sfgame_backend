@@ -1,6 +1,8 @@
 package gr.nlamp.sfgame_backend.tavern;
 
 import gr.nlamp.sfgame_backend.player.Player;
+import gr.nlamp.sfgame_backend.tavern.dto.QuestDto;
+import gr.nlamp.sfgame_backend.tavern.dto.RewardDto;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 

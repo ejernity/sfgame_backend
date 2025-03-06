@@ -5,6 +5,9 @@ import gr.nlamp.sfgame_backend.player.PlayerRepository;
 import gr.nlamp.sfgame_backend.player.PlayerService;
 import gr.nlamp.sfgame_backend.player.PlayerState;
 import gr.nlamp.sfgame_backend.stable.MountService;
+import gr.nlamp.sfgame_backend.tavern.dto.EnergyInfoDto;
+import gr.nlamp.sfgame_backend.tavern.dto.QuestsDto;
+import gr.nlamp.sfgame_backend.tavern.dto.RewardDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -110,6 +113,15 @@ public class QuestService {
         player.setMushrooms(player.getMushrooms() - 1);
         player.setCurrentEnergy(player.getCurrentEnergy().add(BigDecimal.valueOf(BEER_ENERGY)));
         player.setTotalBeersDrink(player.getTotalBeersDrink() + 1);
+    }
+
+    public EnergyInfoDto getEnergyInfo(long playerId) {
+        final Player player = getPlayer(playerId);
+        final EnergyInfoDto energyInfoDto = new EnergyInfoDto();
+        energyInfoDto.setCurrentEnergy(player.getCurrentEnergy());
+        energyInfoDto.setTotalBeersDrink(player.getTotalBeersDrink());
+        energyInfoDto.setTotalUsedEnergy(player.getTotalUsedEnergy());
+        return energyInfoDto;
     }
 
     private void validatePlayerCanDrinkBeer(final Player player) {
