@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -33,6 +34,7 @@ public class PlayerService {
 
     private final ItemMapper itemMapper = ItemMapper.INSTANCE;
     private final BoosterMapper boosterMapper = BoosterMapper.INSTANCE;
+    private final PlayerMapper playerMapper = PlayerMapper.INSTANCE;
 
     private static BigInteger[] expValues;
 
@@ -40,6 +42,7 @@ public class PlayerService {
 
     private final static int MAX_NUM_OF_CHARACTERS_FOR_DESCRIPTION = 255;
     private final static int MUSHROOM_TO_REFRESH_ITEMS = 1;
+    private final static int PLAYERS_RANKING_PAGE_SIZE = 25;
 
     @EventListener(ApplicationReadyEvent.class)
     public void initializeBigNumbers() {
@@ -242,6 +245,13 @@ public class PlayerService {
         mountDto.setMount(player.getMount());
         mountDto.setActiveUntil(Instant.ofEpochMilli(player.getMountActiveUntil()).atZone(ZoneId.systemDefault()).toLocalDateTime());
         return mountDto;
+    }
+
+    public PlayersRankingDto getPlayersRanking(final int page) {
+        final Pageable pageable = PageRequest.of(page, PLAYERS_RANKING_PAGE_SIZE, Sort.by("currentRank").ascending());
+        final Slice<Player> playerSlice = playerRepository.findPlayers(pageable);
+        final Slice<PlayerRankingDto> playerRankingDtoSlice =  new SliceImpl<>(playerMapper.mapPlayerListToPlayerRankingDtoList(playerSlice), playerSlice.getPageable(), playerSlice.hasNext());
+        return new PlayersRankingDto(playerRankingDtoSlice);
     }
 
     private void validateHasEnoughMushroomsForRefreshingItems(final long mushrooms) {

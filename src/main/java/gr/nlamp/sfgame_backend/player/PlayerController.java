@@ -82,4 +82,10 @@ public class PlayerController {
     public ResponseEntity<MountDto> getMount(@PathVariable("playerId") long playerId) {
         return new ResponseEntity<>(playerService.getMount(playerId), HttpStatus.OK);
     }
+
+    @GetMapping("ranking")
+    public ResponseEntity<PlayersRankingDto> getPlayersRanking(@RequestParam("page") int page) {
+        // TODO Why do I have n+1 problem while fetching players on the relation with MagicMirror entity?
+        return new ResponseEntity<>(playerService.getPlayersRanking(page), HttpStatus.OK);
+    }
 }
