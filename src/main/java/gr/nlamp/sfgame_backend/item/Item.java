@@ -35,7 +35,7 @@ public class Item implements Serializable {
     @Enumerated(value = EnumType.STRING)
     private ItemRarity itemRarity;
 
-    private Integer itemId; // image-file-name-in-directories-with-all-items
+    private String itemId;
 
     private Integer strength = 0;
     private Integer dexterity = 0;

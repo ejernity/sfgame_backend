@@ -14,7 +14,7 @@ public class EquipmentItemDto {
     private long id;
     private ItemType itemType;
     private ItemRarity itemRarity;
-    private int itemId;
+    private String itemId;
     private int strength;
     private int dexterity;
     private int intelligence;

@@ -1,5 +1,6 @@
 package gr.nlamp.sfgame_backend.player.dto;
 
+import gr.nlamp.sfgame_backend.player.Class;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,5 +19,6 @@ public class ProfileMainInfoDto {
     private BigInteger experienceForNextLevel;
     private BigInteger honor;
     private long numberOfSuccessQuests;
+    private Class playerClass;
 
 }

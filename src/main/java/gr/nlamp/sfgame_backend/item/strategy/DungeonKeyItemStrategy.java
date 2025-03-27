@@ -14,7 +14,7 @@ public class DungeonKeyItemStrategy implements ItemGenerationStrategy {
         final Item item = new Item();
         item.setItemType(itemType);
         item.setSlotType(slotType);
-        item.setItemId(999); // TODO Placeholder ID for potions
+        item.setItemId("999"); // TODO Placeholder ID for potions
         item.setCoinCost(BigInteger.ZERO);
         item.setMushCost(0L);
 

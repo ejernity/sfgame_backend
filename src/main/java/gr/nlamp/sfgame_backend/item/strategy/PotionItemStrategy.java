@@ -21,7 +21,7 @@ public class PotionItemStrategy implements ItemGenerationStrategy {
         potion.setItemType(itemType);
         potion.setSlotType(slotType);
         potion.setPotionType(potionTypes[random.nextInt(potionTypes.length)]);
-        potion.setItemId(999); // TODO Placeholder ID for potions
+        potion.setItemId("999"); // TODO Placeholder ID for potions
         potion.setCoinCost(getCoinCost(potion, player)); // Fixed or scaled cost
         potion.setMushCost(0L);
         if (potion.getPotionType().equals(PotionType.ETERNAL_LIFE))

@@ -74,6 +74,7 @@ public class PlayerService {
         profileMainInfoDto.setGainedExperience(player.getGainedExperience());
         profileMainInfoDto.setNumberOfSuccessQuests(player.getNumberOfSuccessQuests());
         profileMainInfoDto.setExperienceForNextLevel(expForNextLevel);
+        profileMainInfoDto.setPlayerClass(player.getPlayerClass());
         return profileMainInfoDto;
     }
 
@@ -315,7 +316,8 @@ public class PlayerService {
     private BigInteger getCostForNextSkillValue(final BigInteger skillCurrentValue) {
         if (skillCurrentValue.compareTo(BigInteger.valueOf(3151)) > 0)
             return BigInteger.valueOf(10000000);
-        return skillValues[skillCurrentValue.intValue()];
+        // TODO Issue for new players with starting value for a skill at negative number, OOB Exception for loaded coins/per/skill array
+        return skillValues[Math.max(skillCurrentValue.intValue(), 0)];
     }
 
     private static BigInteger getExperienceForNextLevel(final long level) {

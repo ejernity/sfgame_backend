@@ -19,7 +19,7 @@ public class DefaultItemStrategy implements ItemGenerationStrategy {
         Item item = new Item();
         item.setItemType(itemType);
         item.setSlotType(slotType);
-        item.setItemId(123); // TODO Placeholder for actual item ID logic
+        item.setItemId("123"); // TODO Placeholder for actual item ID logic
 
         // Assign rarity
         setRarity(item);
