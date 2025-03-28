@@ -4,6 +4,7 @@ import gr.nlamp.sfgame_backend.item.booster.Booster;
 import gr.nlamp.sfgame_backend.item.booster.BoosterRepository;
 import gr.nlamp.sfgame_backend.item.dto.MoveItemRequestDto;
 import gr.nlamp.sfgame_backend.player.Player;
+import gr.nlamp.sfgame_backend.player.dto.BagItemDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ public class ItemService {
             SlotType.BAG_4, SlotType.BAG_5, SlotType.BAG_6, SlotType.BAG_7, SlotType.BAG_8, SlotType.BAG_9,
             SlotType.BAG_10, SlotType.BAG_11, SlotType.BAG_12, SlotType.BAG_13, SlotType.BAG_14, SlotType.BAG_15,
             SlotType.BAG_16);
+    private final ItemMapper itemMapper = ItemMapper.INSTANCE;
 
     // TODO: Future feature allow movement between equipped items and items in bag
     public void moveBagItem(final long playerId, final MoveItemRequestDto dto) {
@@ -68,7 +70,7 @@ public class ItemService {
         itemRepository.save(item);
     }
 
-    public void unequip(final long playerId, final long itemId) {
+    public BagItemDto unequip(final long playerId, final long itemId) {
         final Item item = getItemIfExists(itemId);
         validateItemBelongsToPlayer(item, playerId);
         validateSlotTypeBelongsToGroupOfItems(item.getSlotType(), SlotType.EQUIPMENT.name());
@@ -79,7 +81,7 @@ public class ItemService {
             throw new RuntimeException("No slot available to unequip item.");
 
         item.setSlotType(firstAvailableSlotInBag);
-        itemRepository.save(item);
+        return itemMapper.mapItemToBagItem(itemRepository.save(item));
     }
 
     public void buy(final long playerId, final long itemId) {
@@ -127,10 +129,8 @@ public class ItemService {
         final Player player = booster.getPlayer();
         clearInactiveBoosters(player);
 
-        validateMaxActiveBoostersForPlayer(player);
-
         final Optional<Booster> optionalExistingBooster = player.getBoosters()
-                .stream().filter(b -> b.getPotionType().name().split("_")[0].equals(booster.getPotionType().name().split("_")[0]))
+                .stream().filter(b -> b.getPotionType().name().split("_")[0].equals(booster.getPotionType().name().split("_")[0]) && b.getSlotType().equals(SlotType.EQUIPMENT))
                 .findFirst();
         final boolean existingBoosterWithSamePotionTypeCategory = optionalExistingBooster.isPresent();
         if (existingBoosterWithSamePotionTypeCategory) {
@@ -146,6 +146,8 @@ public class ItemService {
                 boosterRepository.save(booster);
             }
         } else {
+            validateMaxActiveBoostersForPlayer(player);
+
             booster.setSlotType(SlotType.EQUIPMENT);
             booster.setActiveUntil(System.currentTimeMillis() + booster.getPotionType().getDays() * 86400000);
             boosterRepository.save(booster);

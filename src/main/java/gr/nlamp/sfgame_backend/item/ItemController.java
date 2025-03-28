@@ -1,8 +1,10 @@
 package gr.nlamp.sfgame_backend.item;
 
 import gr.nlamp.sfgame_backend.item.dto.MoveItemRequestDto;
+import gr.nlamp.sfgame_backend.player.dto.BagItemDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,10 +30,9 @@ public class ItemController {
     }
 
     @GetMapping("{playerId}/unequip/{itemId}")
-    public ResponseEntity<Void> unequip(@PathVariable("playerId") final long playerId,
-                                      @PathVariable("itemId") final long itemId) {
-        itemService.unequip(playerId, itemId);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<BagItemDto> unequip(@PathVariable("playerId") final long playerId,
+                                              @PathVariable("itemId") final long itemId) {
+        return new ResponseEntity<>(itemService.unequip(playerId, itemId), HttpStatus.OK);
     }
 
     @GetMapping("{playerId}/buy/{itemId}")
