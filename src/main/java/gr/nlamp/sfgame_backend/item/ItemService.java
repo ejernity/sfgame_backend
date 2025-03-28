@@ -121,6 +121,7 @@ public class ItemService {
         itemRepository.deleteItemById(item.getId());
     }
 
+    @Transactional(rollbackOn = Exception.class, value = Transactional.TxType.REQUIRES_NEW)
     public void consumePotion(final long playerId, final long boosterId) {
         final Booster booster = getBoosterIfExists(boosterId);
         validateItemBelongsToPlayer(booster, playerId);
@@ -137,10 +138,10 @@ public class ItemService {
             final Booster existingBooster = optionalExistingBooster.get();
             if (existingBooster.getPotionType().getPercentage() == booster.getPotionType().getPercentage()) {
                 existingBooster.setActiveUntil(existingBooster.getActiveUntil() + booster.getPotionType().getDays() * 86400000);
-                boosterRepository.delete(booster);
+                boosterRepository.deleteBoosterById(booster.getId());
                 boosterRepository.save(existingBooster);
             } else if (existingBooster.getPotionType().getPercentage() < booster.getPotionType().getPercentage()) {
-                boosterRepository.delete(existingBooster);
+                boosterRepository.deleteBoosterById(existingBooster.getId());
                 booster.setSlotType(SlotType.EQUIPMENT);
                 booster.setActiveUntil(System.currentTimeMillis() + booster.getPotionType().getDays() * 86400000);
                 boosterRepository.save(booster);

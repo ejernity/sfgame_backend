@@ -2,6 +2,7 @@ package gr.nlamp.sfgame_backend.item.booster;
 
 import gr.nlamp.sfgame_backend.item.SlotType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -15,5 +16,9 @@ public interface BoosterRepository extends JpaRepository<Booster, Long> {
     int countActiveBoostersForPlayer(@Param("playerId") final long playerId);
 
     List<Booster> findByPlayerIdAndSlotType(long playerId, SlotType slotType);
+
+    @Modifying
+    @Query("DELETE FROM Booster b WHERE b.id = :id")
+    void deleteBoosterById(@Param("id") long id);
 
 }
