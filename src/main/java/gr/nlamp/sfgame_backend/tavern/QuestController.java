@@ -21,7 +21,7 @@ public class QuestController {
         return new ResponseEntity<>(questService.getAll(playerId), HttpStatus.OK);
     }
 
-    @PostMapping("{playerId}/{questId}")
+    @GetMapping("{playerId}/{questId}")
     public ResponseEntity<Void> start(@PathVariable("playerId") final long playerId,
                                       @PathVariable("questId") final long questId) {
         questService.start(playerId, questId);
