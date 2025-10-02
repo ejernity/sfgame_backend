@@ -163,80 +163,34 @@ public class PlayerService {
 
     public SkillsAnalyticalDto getSkillsAnalytical(final long playerId) {
         final Player player = getPlayer(playerId);
-        final SkillsAnalyticalDto result = new SkillsAnalyticalDto();
-        result.setBaseStrength(player.getStrength());
-        result.setBaseDexterity(player.getDexterity());
-        result.setBaseIntelligence(player.getIntelligence());
-        result.setBaseConstitution(player.getConstitution());
-        result.setBaseLuck(player.getLuck());
-
-        final List<Item> itemList = itemRepository.findItemsInSlotTypes(playerId, SlotType.equipmentSlots);
-        final List<Item> provideArmorItems = itemList.stream().filter(i -> ItemType.provideArmorItemTypes.contains(i.getItemType())).toList();
-        result.setTotalArmor(provideArmorItems.stream().map(Item::getArmor).reduce(Integer::sum).orElse(0));
-
-        final List<Item> provideSkillsItems = itemList.stream().filter(i -> !i.getItemType().equals(ItemType.POTION)).toList();
-        for (final Item item : provideSkillsItems) {
-            result.setEquipmentStrength(result.getEquipmentStrength().add(BigInteger.valueOf(item.getStrength())));
-            result.setEquipmentDexterity(result.getEquipmentDexterity().add(BigInteger.valueOf(item.getDexterity())));
-            result.setEquipmentIntelligence(result.getEquipmentIntelligence().add(BigInteger.valueOf(item.getIntelligence())));
-            result.setEquipmentConstitution(result.getEquipmentConstitution().add(BigInteger.valueOf(item.getConstitution())));
-            result.setEquipmentLuck(result.getEquipmentLuck().add(BigInteger.valueOf(item.getLuck())));
-        }
-
-        final List<Item> boosters = itemList.stream().filter(i -> i.getItemType().equals(ItemType.POTION)).toList();
-        for (final Item item : boosters) {
-            if (item instanceof Booster booster) {
-                final PotionType potionType = booster.getPotionType();
-
-                if (PotionType.STRENGTH_POTIONS.contains(potionType)) {
-                    final BigInteger boosterExtraSkill = BigDecimal.valueOf(potionType.getPercentage())
-                            .multiply(new BigDecimal(result.getBaseStrength()))
-                            .setScale(0, RoundingMode.HALF_UP)
-                            .toBigInteger();
-                    result.setBoosterStrength(boosterExtraSkill);
-                    continue;
-                }
-
-                if (PotionType.DEXTERITY_POTIONS.contains(potionType)) {
-                    final BigInteger boosterExtraSkill = BigDecimal.valueOf(potionType.getPercentage())
-                            .multiply(new BigDecimal(result.getBaseDexterity()))
-                            .setScale(0, RoundingMode.HALF_UP)
-                            .toBigInteger();
-                    result.setBoosterDexterity(boosterExtraSkill);
-                    continue;
-                }
-
-                if (PotionType.INTELLIGENCE_POTIONS.contains(potionType)) {
-                    final BigInteger boosterExtraSkill = BigDecimal.valueOf(potionType.getPercentage())
-                            .multiply(new BigDecimal(result.getBaseIntelligence()))
-                            .setScale(0, RoundingMode.HALF_UP)
-                            .toBigInteger();
-                    result.setBoosterIntelligence(boosterExtraSkill);
-                    continue;
-                }
-
-                if (PotionType.CONSTITUTION_POTIONS.contains(potionType)) {
-                    final BigInteger boosterExtraSkill = BigDecimal.valueOf(potionType.getPercentage())
-                            .multiply(new BigDecimal(result.getBaseConstitution()))
-                            .setScale(0, RoundingMode.HALF_UP)
-                            .toBigInteger();
-                    result.setBoosterConstitution(boosterExtraSkill);
-                    continue;
-                }
-
-                if (PotionType.LUCK_POTIONS.contains(potionType)) {
-                    final BigInteger boosterExtraSkill = BigDecimal.valueOf(potionType.getPercentage())
-                            .multiply(new BigDecimal(result.getBaseLuck()))
-                            .setScale(0, RoundingMode.HALF_UP)
-                            .toBigInteger();
-                    result.setBoosterLuck(boosterExtraSkill);
-                }
-            }
-        }
-
-        // TODO Do some calculation/formula way to produce hit points for the return DTO
-        return result;
+        return getSkillsAnalyticalDto(player);
     }
+
+    public SkillsAnalyticalDto getSkillsAnalytical(final Player player) {
+        return getSkillsAnalyticalDto(player);
+    }
+
+    public BigInteger calculateMaxHP(SkillsAnalyticalDto stats, Player player)
+    {
+        // Βασικό HP από Constitution + Equipment + Boosters
+        final BigInteger baseCon = stats.getBaseConstitution();
+        final BigInteger equipCon = stats.getEquipmentConstitution();
+        final BigInteger boostCon = stats.getBoosterConstitution();
+
+        final BigInteger totalCon = baseCon.add(equipCon).add(boostCon);
+
+        // Πολλαπλασιαστής ανάλογα με level (αν έχεις level στο Player)
+        final long level = player.getLevel();  // πρέπει να το έχεις
+        final double levelFactor = 1 + level * 0.1;  // π.χ. +10% HP ανά επίπεδο
+
+        // Τελική υπολογισμός HP
+        final BigDecimal hpDecimal = new BigDecimal(totalCon)
+                .multiply(BigDecimal.valueOf(10))   // factor, π.χ. 10 HP ανά μονάδα Constitution
+                .multiply(BigDecimal.valueOf(levelFactor));
+
+        return hpDecimal.setScale(0, RoundingMode.HALF_UP).toBigInteger();
+    }
+
 
     public MountDto getMount(long playerId) {
         final Player player = getPlayer(playerId);
@@ -253,6 +207,13 @@ public class PlayerService {
         final Slice<Player> playerSlice = playerRepository.findPlayers(pageable);
         final Slice<PlayerRankingDto> playerRankingDtoSlice =  new SliceImpl<>(playerMapper.mapPlayerListToPlayerRankingDtoList(playerSlice), playerSlice.getPageable(), playerSlice.hasNext());
         return new PlayersRankingDto(playerRankingDtoSlice);
+    }
+
+    public Player getPlayer(final long playerId) {
+        final Player player = playerRepository.findById(playerId).orElse(null);
+        if (player == null)
+            throw new RuntimeException("Player not found");
+        return player;
     }
 
     private void validateHasEnoughMushroomsForRefreshingItems(final long mushrooms) {
@@ -345,10 +306,80 @@ public class PlayerService {
             return expValues[(int) level];
     }
 
-    private Player getPlayer(final long playerId) {
-        final Player player = playerRepository.findById(playerId).orElse(null);
-        if (player == null)
-            throw new RuntimeException("Player not found");
-        return player;
+    private SkillsAnalyticalDto getSkillsAnalyticalDto(final Player player) {
+        final SkillsAnalyticalDto result = new SkillsAnalyticalDto();
+        result.setBaseStrength(player.getStrength());
+        result.setBaseDexterity(player.getDexterity());
+        result.setBaseIntelligence(player.getIntelligence());
+        result.setBaseConstitution(player.getConstitution());
+        result.setBaseLuck(player.getLuck());
+
+        final List<Item> itemList = itemRepository.findItemsInSlotTypes(player.getId(), SlotType.equipmentSlots);
+        final List<Item> provideArmorItems = itemList.stream().filter(i -> ItemType.provideArmorItemTypes.contains(i.getItemType())).toList();
+        result.setTotalArmor(provideArmorItems.stream().map(Item::getArmor).reduce(Integer::sum).orElse(0));
+
+        final List<Item> provideSkillsItems = itemList.stream().filter(i -> !i.getItemType().equals(ItemType.POTION)).toList();
+        for (final Item item : provideSkillsItems) {
+            result.setEquipmentStrength(result.getEquipmentStrength().add(BigInteger.valueOf(item.getStrength())));
+            result.setEquipmentDexterity(result.getEquipmentDexterity().add(BigInteger.valueOf(item.getDexterity())));
+            result.setEquipmentIntelligence(result.getEquipmentIntelligence().add(BigInteger.valueOf(item.getIntelligence())));
+            result.setEquipmentConstitution(result.getEquipmentConstitution().add(BigInteger.valueOf(item.getConstitution())));
+            result.setEquipmentLuck(result.getEquipmentLuck().add(BigInteger.valueOf(item.getLuck())));
+        }
+
+        final List<Item> boosters = itemList.stream().filter(i -> i.getItemType().equals(ItemType.POTION)).toList();
+        for (final Item item : boosters) {
+            if (item instanceof Booster booster) {
+                final PotionType potionType = booster.getPotionType();
+
+                if (PotionType.STRENGTH_POTIONS.contains(potionType)) {
+                    final BigInteger boosterExtraSkill = BigDecimal.valueOf(potionType.getPercentage())
+                            .multiply(new BigDecimal(result.getBaseStrength()))
+                            .setScale(0, RoundingMode.HALF_UP)
+                            .toBigInteger();
+                    result.setBoosterStrength(boosterExtraSkill);
+                    continue;
+                }
+
+                if (PotionType.DEXTERITY_POTIONS.contains(potionType)) {
+                    final BigInteger boosterExtraSkill = BigDecimal.valueOf(potionType.getPercentage())
+                            .multiply(new BigDecimal(result.getBaseDexterity()))
+                            .setScale(0, RoundingMode.HALF_UP)
+                            .toBigInteger();
+                    result.setBoosterDexterity(boosterExtraSkill);
+                    continue;
+                }
+
+                if (PotionType.INTELLIGENCE_POTIONS.contains(potionType)) {
+                    final BigInteger boosterExtraSkill = BigDecimal.valueOf(potionType.getPercentage())
+                            .multiply(new BigDecimal(result.getBaseIntelligence()))
+                            .setScale(0, RoundingMode.HALF_UP)
+                            .toBigInteger();
+                    result.setBoosterIntelligence(boosterExtraSkill);
+                    continue;
+                }
+
+                if (PotionType.CONSTITUTION_POTIONS.contains(potionType)) {
+                    final BigInteger boosterExtraSkill = BigDecimal.valueOf(potionType.getPercentage())
+                            .multiply(new BigDecimal(result.getBaseConstitution()))
+                            .setScale(0, RoundingMode.HALF_UP)
+                            .toBigInteger();
+                    result.setBoosterConstitution(boosterExtraSkill);
+                    continue;
+                }
+
+                if (PotionType.LUCK_POTIONS.contains(potionType)) {
+                    final BigInteger boosterExtraSkill = BigDecimal.valueOf(potionType.getPercentage())
+                            .multiply(new BigDecimal(result.getBaseLuck()))
+                            .setScale(0, RoundingMode.HALF_UP)
+                            .toBigInteger();
+                    result.setBoosterLuck(boosterExtraSkill);
+                }
+            }
+        }
+
+        final BigInteger maxHP = calculateMaxHP(result, player);
+        result.setHitPoints(maxHP);
+        return result;
     }
 }
