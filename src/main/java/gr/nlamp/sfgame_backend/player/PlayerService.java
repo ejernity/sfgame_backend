@@ -25,6 +25,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class PlayerService {
+    private final ItemService itemService;
 
     private final PlayerRepository playerRepository;
     private final ItemRepository itemRepository;
@@ -170,27 +171,30 @@ public class PlayerService {
         return getSkillsAnalyticalDto(player);
     }
 
-    public BigInteger calculateMaxHP(SkillsAnalyticalDto stats, Player player)
-    {
-        // Βασικό HP από Constitution + Equipment + Boosters
-        final BigInteger baseCon = stats.getBaseConstitution();
-        final BigInteger equipCon = stats.getEquipmentConstitution();
-        final BigInteger boostCon = stats.getBoosterConstitution();
+    public BigInteger calculateMaxHP(SkillsAnalyticalDto stats, Player player) {
+        // 1️⃣ Συνολικό Constitution (βάση + εξοπλισμός + boosters)
+        final BigInteger totalCon = stats.getBaseConstitution()
+                .add(stats.getEquipmentConstitution())
+                .add(stats.getBoosterConstitution());
 
-        final BigInteger totalCon = baseCon.add(equipCon).add(boostCon);
+        // 2️⃣ Level factor
+        final long level = player.getLevel();
+        final double levelFactor = 1 + level * 0.1;  // π.χ. +10% ανά level
 
-        // Πολλαπλασιαστής ανάλογα με level (αν έχεις level στο Player)
-        final long level = player.getLevel();  // πρέπει να το έχεις
-        final double levelFactor = 1 + level * 0.1;  // π.χ. +10% HP ανά επίπεδο
+        // 3️⃣ Class multiplier (SFGAME-style)
+        double classMultiplier = switch (player.getPlayerClass()) {
+            case WARRIOR -> 8.0;
+            case SCOUT -> 3.0;
+            case MAGE -> 1.2;
+        };
 
-        // Τελική υπολογισμός HP
+        // 4️⃣ Υπολογισμός HP
         final BigDecimal hpDecimal = new BigDecimal(totalCon)
-                .multiply(BigDecimal.valueOf(10))   // factor, π.χ. 10 HP ανά μονάδα Constitution
-                .multiply(BigDecimal.valueOf(levelFactor));
+                .multiply(BigDecimal.valueOf(classMultiplier))   // βάση ανά class
+                .multiply(BigDecimal.valueOf(levelFactor));       // scaling με level
 
         return hpDecimal.setScale(0, RoundingMode.HALF_UP).toBigInteger();
     }
-
 
     public MountDto getMount(long playerId) {
         final Player player = getPlayer(playerId);
@@ -313,6 +317,8 @@ public class PlayerService {
         result.setBaseIntelligence(player.getIntelligence());
         result.setBaseConstitution(player.getConstitution());
         result.setBaseLuck(player.getLuck());
+
+        itemService.clearInactiveBoosters(player);
 
         final List<Item> itemList = itemRepository.findItemsInSlotTypes(player.getId(), SlotType.equipmentSlots);
         final List<Item> provideArmorItems = itemList.stream().filter(i -> ItemType.provideArmorItemTypes.contains(i.getItemType())).toList();
